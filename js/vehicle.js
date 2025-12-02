@@ -190,48 +190,26 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
             return;
         }
         
-        // Boost with Shift
-        const isBoosting = cursors.shift && cursors.shift.isDown;
-        let currentSpeed = isBoosting ? this.boostSpeed : this.speed;
-        
         let velocityX = 0;
         let velocityY = 0;
         
-        // Get game width for center calculation
-        const gameWidth = this.scene.scale ? this.scene.scale.width : CONFIG.width;
-        const centerX = gameWidth / 2;
-        
-        // Movement controls - Free travel from place to place (no auto-centering)
-        const leftPressed = cursors.left && cursors.left.isDown;
-        const rightPressed = cursors.right && cursors.right.isDown;
-        const aPressed = cursors.a && cursors.a.isDown;
-        const dPressed = cursors.d && cursors.d.isDown;
-        
-        // Free horizontal movement - travel anywhere
-        if (leftPressed || aPressed) {
-            velocityX = -currentSpeed;
-            this.targetRotation = -0.3; // Bank left
-        } else if (rightPressed || dPressed) {
-            velocityX = currentSpeed;
-            this.targetRotation = 0.3; // Bank right
+        // Simple arrow key controls only
+        if (cursors.left && cursors.left.isDown) {
+            velocityX = -this.speed;
+            this.targetRotation = -0.2; // Bank left
+        } else if (cursors.right && cursors.right.isDown) {
+            velocityX = this.speed;
+            this.targetRotation = 0.2; // Bank right
         } else {
-            // No input - stop horizontal movement, level out
             velocityX = 0;
             this.targetRotation = 0; // Level flight
         }
         
-        // Vertical movement - free travel up and down
-        const upPressed = cursors.up && cursors.up.isDown;
-        const downPressed = cursors.down && cursors.down.isDown;
-        const wPressed = cursors.w && cursors.w.isDown;
-        const sPressed = cursors.s && cursors.s.isDown;
-        
-        if (upPressed || wPressed) {
-            velocityY = -currentSpeed; // Full speed vertical
-        } else if (downPressed || sPressed) {
-            velocityY = currentSpeed; // Full speed vertical
+        if (cursors.up && cursors.up.isDown) {
+            velocityY = -this.speed;
+        } else if (cursors.down && cursors.down.isDown) {
+            velocityY = this.speed;
         } else {
-            // No vertical input - stop vertical movement
             velocityY = 0;
         }
         
@@ -241,37 +219,32 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
         this.rotation += this.rotationSpeed;
         
         // Limit rotation
-        if (this.rotation > 0.5) this.rotation = 0.5;
-        if (this.rotation < -0.5) this.rotation = -0.5;
+        if (this.rotation > 0.3) this.rotation = 0.3;
+        if (this.rotation < -0.3) this.rotation = -0.3;
         
         this.setVelocity(velocityX, velocityY);
         
-        // Update particle trails
+        // Engine ignition - always on when moving
         const isMoving = velocityX !== 0 || velocityY !== 0;
         if (isMoving) {
             this.play('vehicle-fly', true);
+            // Engine trails always active when moving
             if (this.trail1) {
                 this.trail1.start();
-                this.trail1.setFrequency(Math.max(50, 120 * (this.speed / this.maxSpeed)));
             }
             if (this.trail2) {
                 this.trail2.start();
-                this.trail2.setFrequency(Math.max(50, 120 * (this.speed / this.maxSpeed)));
-            }
-            if (isBoosting && this.boostTrail) {
-                this.boostTrail.start();
-            } else if (this.boostTrail) {
-                this.boostTrail.stop();
             }
         } else {
             this.play('vehicle-idle', true);
-            if (this.trail1) this.trail1.stop();
-            if (this.trail2) this.trail2.stop();
-            if (this.boostTrail) this.boostTrail.stop();
+            // Reduce engine trails when idle
+            if (this.trail1) {
+                this.trail1.setFrequency(20); // Slow down but keep visible
+            }
+            if (this.trail2) {
+                this.trail2.setFrequency(20);
+            }
         }
-        
-        // Update visual speed indicator
-        this.updateSpeedIndicator();
     }
     
     increaseSpeed() {
@@ -348,17 +321,10 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
         // Update speed indicator visual
         this.updateSpeedIndicator();
         
-        // Show speed indicator UI
-        const speedEl = document.getElementById('speed-indicator');
-        if (speedEl) {
-            speedEl.style.display = 'block';
-            speedEl.textContent = `Speed: ${this.currentSpeedLevel}/5 (${Math.round(this.speed)} px/s)`;
-        }
-        
-        // Electric activation effect
+        // Rocket activation effect
         this.scene.tweens.add({
             targets: this,
-            alpha: 0.7,
+            alpha: 0.8,
             duration: 200,
             yoyo: true,
             ease: 'Power2'
@@ -384,12 +350,6 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
         this.setVelocity(0, 0);
         // Re-enable gravity when vehicle is inactive
         this.body.setAllowGravity(true);
-        
-        // Hide speed indicator
-        const speedEl = document.getElementById('speed-indicator');
-        if (speedEl) {
-            speedEl.style.display = 'none';
-        }
     }
     
     travelToNextUniverse() {

@@ -44,39 +44,18 @@ class GameScene extends Phaser.Scene {
             this.playerCollider = this.physics.add.collider(this.player, this.worldGenerator.getPlatforms());
             this.vehicleCollider = this.physics.add.collider(this.vehicle, this.worldGenerator.getPlatforms());
             
-            // Create input
+            // Create input - simple arrow keys only
             this.cursors = this.input.keyboard.createCursorKeys();
-            this.wasd = this.input.keyboard.addKeys('W,S,A,D');
-            this.spaceKey = this.input.keyboard.addKey('SPACE');
             this.eKey = this.input.keyboard.addKey('E');
             this.rKey = this.input.keyboard.addKey('R');
-            this.shiftKey = this.input.keyboard.addKey('SHIFT');
-            this.qKey = this.input.keyboard.addKey('Q');
-            this.plusKey = this.input.keyboard.addKey('PLUS');
-            this.minusKey = this.input.keyboard.addKey('MINUS');
-            this.equalsKey = this.input.keyboard.addKey('EQUALS');
-            this.tKey = this.input.keyboard.addKey('T');
             
-            // Combine keys
+            // Simple controls - just arrow keys
             this.controls = {
                 up: this.cursors.up,
                 down: this.cursors.down,
                 left: this.cursors.left,
-                right: this.cursors.right,
-                space: this.spaceKey,
-                w: this.wasd.W,
-                s: this.wasd.S,
-                a: this.wasd.A,
-                d: this.wasd.D,
-                shift: this.shiftKey,
-                q: this.qKey,
-                plus: this.plusKey,
-                minus: this.minusKey,
-                equals: this.equalsKey
+                right: this.cursors.right
             };
-            
-            // Track speed control to prevent conflicts
-            this.speedControlCooldown = 0;
             
             // Vehicle interaction
             this.physics.add.overlap(this.player, this.vehicle, this.handleVehicleInteraction, null, this);
@@ -111,25 +90,12 @@ class GameScene extends Phaser.Scene {
     }
     
     update() {
-        // Speed control (only when in vehicle)
         if (this.vehicle.isActive && this.vehicle.playerInside) {
-            // Q for slower, =/+ for faster
-            if (Phaser.Input.Keyboard.JustDown(this.qKey)) {
-                this.vehicle.decreaseSpeed();
-                this.updateUI();
-            }
-            if (Phaser.Input.Keyboard.JustDown(this.equalsKey) || Phaser.Input.Keyboard.JustDown(this.plusKey)) {
-                this.vehicle.increaseSpeed();
-                this.updateUI();
-            }
-        }
-        
-        if (this.vehicle.isActive && this.vehicle.playerInside) {
-            // Player is in vehicle - free travel mode
+            // Player is in vehicle - simple arrow key controls
             this.vehicle.update(this.controls);
             // Update player position inside vehicle
             this.player.update(this.controls);
-            // Camera follows vehicle for smooth travel
+            // Camera follows vehicle
             this.cameras.main.startFollow(this.vehicle, false, 0.1, 0.1);
         } else {
             // Player is on foot
@@ -141,14 +107,6 @@ class GameScene extends Phaser.Scene {
         if (Phaser.Input.Keyboard.JustDown(this.rKey) && this.vehicle.isActive) {
             this.travelToNextUniverse();
         }
-        
-        // Check for special actions (T key)
-        if (Phaser.Input.Keyboard.JustDown(this.tKey)) {
-            this.handleSpecialAction();
-        }
-        
-        // Update UI based on current universe
-        this.updateSpecialActionsUI();
     }
     
     createSpecialZones() {
@@ -410,14 +368,6 @@ class GameScene extends Phaser.Scene {
         document.getElementById('universe-name').textContent = universe.name + loopText;
         document.getElementById('planet-name').textContent = planet.name;
         document.getElementById('distance').textContent = totalDistance;
-        
-        // Update speed indicator if vehicle is active
-        if (this.vehicle && this.vehicle.isActive) {
-            const speedEl = document.getElementById('speed-indicator');
-            if (speedEl) {
-                speedEl.textContent = `Speed: ${this.vehicle.currentSpeedLevel}/5 (${Math.round(this.vehicle.speed)} px/s)`;
-            }
-        }
     }
     
     createVisualEffects() {
