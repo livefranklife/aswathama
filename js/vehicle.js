@@ -37,47 +37,62 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
     }
     
     createVehicleGraphics() {
-        const graphics = this.scene.add.graphics();
-        
-        // Electric Rocket Design with transparent cockpit for player visibility
-        // Main rocket body (sleek, electric blue)
-        graphics.fillStyle(0x00aaff);
-        graphics.fillRect(10, 0, 60, 80);
-        
-        // Rocket nose cone
-        graphics.fillStyle(0x00ffff);
-        graphics.fillTriangle(40, 0, 20, 20, 60, 20);
-        
-        // Cockpit window (transparent with glow border for player visibility)
-        graphics.fillStyle(0x00ffff, 0.3); // Semi-transparent
-        graphics.fillRect(25, 15, 30, 25);
-        // Cockpit border glow
-        graphics.lineStyle(2, 0x00ffff, 0.8);
-        graphics.strokeRect(25, 15, 30, 25);
-        
-        // Electric panels on sides
-        graphics.fillStyle(0x00ff00);
-        graphics.fillRect(5, 25, 8, 15);
-        graphics.fillRect(67, 25, 8, 15);
-        graphics.fillRect(5, 45, 8, 15);
-        graphics.fillRect(67, 45, 8, 15);
-        
-        // Rocket fins
-        graphics.fillStyle(0x0088ff);
-        graphics.fillRect(-5, 50, 15, 20);
-        graphics.fillRect(70, 50, 15, 20);
-        
-        // Main engine (electric blue glow)
-        graphics.fillStyle(0x00ffff);
-        graphics.fillRect(25, 75, 30, 15);
-        
-        // Secondary engines
-        graphics.fillStyle(0x00ff00);
-        graphics.fillRect(10, 80, 12, 10);
-        graphics.fillRect(58, 80, 12, 10);
-        
-        graphics.generateTexture('vehicle', 80, 100);
-        graphics.destroy();
+        try {
+            // Check if texture already exists
+            if (this.scene.textures.exists('vehicle')) {
+                return;
+            }
+            
+            const graphics = this.scene.add.graphics();
+            
+            // Electric Rocket Design with transparent cockpit for player visibility
+            // Main rocket body (sleek, electric blue)
+            graphics.fillStyle(0x00aaff);
+            graphics.fillRect(10, 0, 60, 80);
+            
+            // Rocket nose cone
+            graphics.fillStyle(0x00ffff);
+            graphics.fillTriangle(40, 0, 20, 20, 60, 20);
+            
+            // Cockpit window (transparent with glow border for player visibility)
+            graphics.fillStyle(0x00ffff, 0.3); // Semi-transparent
+            graphics.fillRect(25, 15, 30, 25);
+            // Cockpit border glow
+            graphics.lineStyle(2, 0x00ffff, 0.8);
+            graphics.strokeRect(25, 15, 30, 25);
+            
+            // Electric panels on sides
+            graphics.fillStyle(0x00ff00);
+            graphics.fillRect(5, 25, 8, 15);
+            graphics.fillRect(67, 25, 8, 15);
+            graphics.fillRect(5, 45, 8, 15);
+            graphics.fillRect(67, 45, 8, 15);
+            
+            // Rocket fins
+            graphics.fillStyle(0x0088ff);
+            graphics.fillRect(-5, 50, 15, 20);
+            graphics.fillRect(70, 50, 15, 20);
+            
+            // Main engine (electric blue glow)
+            graphics.fillStyle(0x00ffff);
+            graphics.fillRect(25, 75, 30, 15);
+            
+            // Secondary engines
+            graphics.fillStyle(0x00ff00);
+            graphics.fillRect(10, 80, 12, 10);
+            graphics.fillRect(58, 80, 12, 10);
+            
+            graphics.generateTexture('vehicle', 80, 100);
+            graphics.destroy();
+        } catch (error) {
+            console.error('Error creating vehicle graphics:', error);
+            // Create a simple fallback
+            const graphics = this.scene.add.graphics();
+            graphics.fillStyle(0x00aaff);
+            graphics.fillRect(0, 0, 60, 80);
+            graphics.generateTexture('vehicle', 60, 80);
+            graphics.destroy();
+        }
     }
     
     createAnimations() {
@@ -168,7 +183,7 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
         let velocityY = 0;
         
         // Get game width for center calculation
-        const gameWidth = this.scene.scale.width;
+        const gameWidth = this.scene.scale ? this.scene.scale.width : CONFIG.width;
         const centerX = gameWidth / 2;
         
         // Movement controls - Left, Right, Center positioning

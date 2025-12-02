@@ -35,32 +35,47 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     }
     
     createPlayerGraphics() {
-        // Create a simple player sprite using graphics
-        const graphics = this.scene.add.graphics();
-        
-        // Body (blue astronaut-like figure)
-        graphics.fillStyle(0x00aaff);
-        graphics.fillRect(0, 0, 40, 60);
-        
-        // Helmet
-        graphics.fillStyle(0xffffff);
-        graphics.fillCircle(20, 15, 18);
-        
-        // Visor
-        graphics.fillStyle(0x00ffff);
-        graphics.fillRect(8, 10, 24, 12);
-        
-        // Arms
-        graphics.fillStyle(0x00aaff);
-        graphics.fillRect(-8, 20, 12, 30);
-        graphics.fillRect(36, 20, 12, 30);
-        
-        // Legs
-        graphics.fillRect(8, 50, 12, 20);
-        graphics.fillRect(20, 50, 12, 20);
-        
-        graphics.generateTexture('player', 60, 80);
-        graphics.destroy();
+        try {
+            // Check if texture already exists
+            if (this.scene.textures.exists('player')) {
+                return;
+            }
+            
+            // Create a simple player sprite using graphics
+            const graphics = this.scene.add.graphics();
+            
+            // Body (blue astronaut-like figure)
+            graphics.fillStyle(0x00aaff);
+            graphics.fillRect(0, 0, 40, 60);
+            
+            // Helmet
+            graphics.fillStyle(0xffffff);
+            graphics.fillCircle(20, 15, 18);
+            
+            // Visor
+            graphics.fillStyle(0x00ffff);
+            graphics.fillRect(8, 10, 24, 12);
+            
+            // Arms
+            graphics.fillStyle(0x00aaff);
+            graphics.fillRect(-8, 20, 12, 30);
+            graphics.fillRect(36, 20, 12, 30);
+            
+            // Legs
+            graphics.fillRect(8, 50, 12, 20);
+            graphics.fillRect(20, 50, 12, 20);
+            
+            graphics.generateTexture('player', 60, 80);
+            graphics.destroy();
+        } catch (error) {
+            console.error('Error creating player graphics:', error);
+            // Create a simple fallback
+            const graphics = this.scene.add.graphics();
+            graphics.fillStyle(0x00aaff);
+            graphics.fillRect(0, 0, 40, 60);
+            graphics.generateTexture('player', 40, 60);
+            graphics.destroy();
+        }
     }
     
     createAnimations() {

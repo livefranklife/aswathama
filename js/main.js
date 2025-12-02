@@ -17,71 +17,87 @@ class GameScene extends Phaser.Scene {
     }
     
     create() {
-        // Initialize world generator
-        this.worldGenerator = new WorldGenerator(this);
+        try {
+            // Initialize world generator
+            this.worldGenerator = new WorldGenerator(this);
+            
+            // Get current planet data
+            const universe = UNIVERSES[currentUniverseIndex];
+            const planet = universe.planets[currentPlanetIndex];
+            
+            // Create world
+            this.worldGenerator.createWorld(planet);
+            
+            // Create player
+            this.player = new Player(this, 100, CONFIG.height - 200);
+            
+            // Create vehicle
+            this.vehicle = new Vehicle(this, CONFIG.width - 150, CONFIG.height - 200);
         
-        // Get current planet data
-        const universe = UNIVERSES[currentUniverseIndex];
-        const planet = universe.planets[currentPlanetIndex];
-        
-        // Create world
-        this.worldGenerator.createWorld(planet);
-        
-        // Create player
-        this.player = new Player(this, 100, CONFIG.height - 200);
-        
-        // Create vehicle
-        this.vehicle = new Vehicle(this, CONFIG.width - 150, CONFIG.height - 200);
-        
-        // Create collisions and store references
-        this.playerCollider = this.physics.add.collider(this.player, this.worldGenerator.getPlatforms());
-        this.vehicleCollider = this.physics.add.collider(this.vehicle, this.worldGenerator.getPlatforms());
-        
-        // Create input
-        this.cursors = this.input.keyboard.createCursorKeys();
-        this.wasd = this.input.keyboard.addKeys('W,S,A,D');
-        this.spaceKey = this.input.keyboard.addKey('SPACE');
-        this.eKey = this.input.keyboard.addKey('E');
-        this.rKey = this.input.keyboard.addKey('R');
-        this.shiftKey = this.input.keyboard.addKey('SHIFT');
-        this.qKey = this.input.keyboard.addKey('Q');
-        this.plusKey = this.input.keyboard.addKey('PLUS');
-        this.minusKey = this.input.keyboard.addKey('MINUS');
-        this.equalsKey = this.input.keyboard.addKey('EQUALS');
-        
-        // Combine keys
-        this.controls = {
-            up: this.cursors.up,
-            down: this.cursors.down,
-            left: this.cursors.left,
-            right: this.cursors.right,
-            space: this.spaceKey,
-            w: this.wasd.W,
-            s: this.wasd.S,
-            a: this.wasd.A,
-            d: this.wasd.D,
-            shift: this.shiftKey,
-            q: this.qKey,
-            plus: this.plusKey,
-            minus: this.minusKey,
-            equals: this.equalsKey
-        };
-        
-        // Track speed control to prevent conflicts
-        this.speedControlCooldown = 0;
-        
-        // Vehicle interaction
-        this.physics.add.overlap(this.player, this.vehicle, this.handleVehicleInteraction, null, this);
-        
-        // Update UI
-        this.updateUI();
-        
-        // Create camera effects
-        this.cameras.main.setBounds(0, 0, CONFIG.width, CONFIG.height);
-        this.cameras.main.startFollow(this.vehicle.isActive ? this.vehicle : this.player);
-        
-        // Add visual effects
-        this.createVisualEffects();
+            // Create collisions and store references
+            this.playerCollider = this.physics.add.collider(this.player, this.worldGenerator.getPlatforms());
+            this.vehicleCollider = this.physics.add.collider(this.vehicle, this.worldGenerator.getPlatforms());
+            
+            // Create input
+            this.cursors = this.input.keyboard.createCursorKeys();
+            this.wasd = this.input.keyboard.addKeys('W,S,A,D');
+            this.spaceKey = this.input.keyboard.addKey('SPACE');
+            this.eKey = this.input.keyboard.addKey('E');
+            this.rKey = this.input.keyboard.addKey('R');
+            this.shiftKey = this.input.keyboard.addKey('SHIFT');
+            this.qKey = this.input.keyboard.addKey('Q');
+            this.plusKey = this.input.keyboard.addKey('PLUS');
+            this.minusKey = this.input.keyboard.addKey('MINUS');
+            this.equalsKey = this.input.keyboard.addKey('EQUALS');
+            
+            // Combine keys
+            this.controls = {
+                up: this.cursors.up,
+                down: this.cursors.down,
+                left: this.cursors.left,
+                right: this.cursors.right,
+                space: this.spaceKey,
+                w: this.wasd.W,
+                s: this.wasd.S,
+                a: this.wasd.A,
+                d: this.wasd.D,
+                shift: this.shiftKey,
+                q: this.qKey,
+                plus: this.plusKey,
+                minus: this.minusKey,
+                equals: this.equalsKey
+            };
+            
+            // Track speed control to prevent conflicts
+            this.speedControlCooldown = 0;
+            
+            // Vehicle interaction
+            this.physics.add.overlap(this.player, this.vehicle, this.handleVehicleInteraction, null, this);
+            
+            // Update UI
+            this.updateUI();
+            
+            // Create camera effects
+            this.cameras.main.setBounds(0, 0, CONFIG.width, CONFIG.height);
+            this.cameras.main.startFollow(this.vehicle.isActive ? this.vehicle : this.player);
+            
+            // Add visual effects
+            this.createVisualEffects();
+        } catch (error) {
+            console.error('Error in create():', error);
+            // Show error message
+            const errorText = this.add.text(
+                CONFIG.width / 2,
+                CONFIG.height / 2,
+                'Error initializing game. Check console.',
+                {
+                    fontSize: '24px',
+                    fill: '#ff0000',
+                    align: 'center'
+                }
+            );
+            errorText.setOrigin(0.5);
+        }
     }
     
     update() {
