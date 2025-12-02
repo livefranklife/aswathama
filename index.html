@@ -105,7 +105,7 @@
             top: 50%;
             transform: translate(-50%, -50%);
             z-index: 100;
-            animation: fly 15s infinite linear;
+            transition: transform 0.1s ease-out;
         }
         
         .rocket-body {
@@ -178,30 +178,13 @@
             }
         }
         
-        @keyframes fly {
-            0% {
-                left: -100px;
-                top: 50%;
-                transform: translateY(-50%) rotate(0deg);
-            }
-            25% {
-                top: 20%;
-                transform: translateY(-50%) rotate(-15deg);
-            }
-            50% {
-                left: 50%;
-                top: 50%;
-                transform: translate(-50%, -50%) rotate(0deg);
-            }
-            75% {
-                top: 80%;
-                transform: translateY(-50%) rotate(15deg);
-            }
-            100% {
-                left: 1300px;
-                top: 50%;
-                transform: translateY(-50%) rotate(0deg);
-            }
+        .rocket-moving {
+            animation: pulse 0.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
         
         /* UI Overlay */
@@ -286,7 +269,8 @@
         
         <div id="controls-panel">
             <div class="control-section">
-                <div class="control-item">Rocket Flying Through Universe</div>
+                <div class="control-item">Arrow Keys - Control Rocket</div>
+                <div class="control-item">WASD - Alternative Controls</div>
             </div>
         </div>
     </div>
@@ -304,6 +288,82 @@
             star.style.animationDelay = Math.random() * 3 + 's';
             galaxyBg.appendChild(star);
         }
+        
+        // Rocket control
+        const rocket = document.getElementById('rocket');
+        const gameContainer = document.getElementById('game-container');
+        let rocketX = 50; // percentage
+        let rocketY = 50; // percentage
+        let rotation = 0;
+        const speed = 1; // percentage per frame
+        let keys = {};
+        
+        // Update rocket position
+        function updateRocket() {
+            let moved = false;
+            let newRotation = rotation;
+            
+            // Handle movement
+            if (keys['ArrowUp'] || keys['w'] || keys['W']) {
+                rocketY = Math.max(5, rocketY - speed);
+                newRotation = -15;
+                moved = true;
+            }
+            if (keys['ArrowDown'] || keys['s'] || keys['S']) {
+                rocketY = Math.min(95, rocketY + speed);
+                newRotation = 15;
+                moved = true;
+            }
+            if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
+                rocketX = Math.max(5, rocketX - speed);
+                newRotation = -30;
+                moved = true;
+            }
+            if (keys['ArrowRight'] || keys['d'] || keys['D']) {
+                rocketX = Math.min(95, rocketX + speed);
+                newRotation = 30;
+                moved = true;
+            }
+            
+            // Handle diagonal movement rotation
+            if (keys['ArrowUp'] && keys['ArrowLeft']) newRotation = -25;
+            if (keys['ArrowUp'] && keys['ArrowRight']) newRotation = -25;
+            if (keys['ArrowDown'] && keys['ArrowLeft']) newRotation = 25;
+            if (keys['ArrowDown'] && keys['ArrowRight']) newRotation = 25;
+            
+            // Update rotation
+            if (moved) {
+                rotation = newRotation;
+                rocket.classList.add('rocket-moving');
+            } else {
+                rotation *= 0.9; // Smooth rotation return to center
+                if (Math.abs(rotation) < 0.5) rotation = 0;
+                rocket.classList.remove('rocket-moving');
+            }
+            
+            // Apply position and rotation
+            rocket.style.left = rocketX + '%';
+            rocket.style.top = rocketY + '%';
+            rocket.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+            
+            // Update distance when moving
+            if (moved) {
+                distance += 0.1;
+                updateUI();
+            }
+        }
+        
+        // Keyboard event listeners
+        document.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+        
+        // Game loop
+        setInterval(updateRocket, 16); // ~60 FPS
         
         // Universe progression
         const universes = [
@@ -326,18 +386,16 @@
         function updateUI() {
             document.getElementById('universe-name').textContent = universes[currentUniverse];
             document.getElementById('planet-name').textContent = planets[planetIndex] || "Traveling...";
-            document.getElementById('distance').textContent = distance;
-        }
-        
-        // Cycle through universes
-        setInterval(() => {
-            planetIndex = (planetIndex + 1) % planets.length;
-            if (planetIndex === 0) {
-                currentUniverse = (currentUniverse + 1) % universes.length;
+            document.getElementById('distance').textContent = Math.floor(distance);
+            
+            // Auto-advance universe/planet based on distance
+            if (distance > 0 && distance % 500 < 1) {
+                planetIndex = (planetIndex + 1) % planets.length;
+                if (planetIndex === 0) {
+                    currentUniverse = (currentUniverse + 1) % universes.length;
+                }
             }
-            distance += Math.floor(Math.random() * 50) + 25;
-            updateUI();
-        }, 3000);
+        }
         
         updateUI();
     </script>
