@@ -103,4 +103,5 @@ const UNIVERSES = [
 let currentUniverseIndex = 0;
 let currentPlanetIndex = 0;
 let totalDistance = 0;
+let universeLoopCount = 0; // Track how many times through all universes
 

@@ -160,10 +160,12 @@ class GameScene extends Phaser.Scene {
             currentPlanetIndex = 0;
             currentUniverseIndex++;
             
+            // Loop back to the beginning when reaching the end
             if (currentUniverseIndex >= UNIVERSES.length) {
-                // Game complete!
-                this.gameComplete();
-                return;
+                currentUniverseIndex = 0; // Loop back to Milky Way Galaxy
+                universeLoopCount++; // Increment loop counter
+                // Show loop message
+                this.showLoopMessage();
             }
         }
         
@@ -203,11 +205,42 @@ class GameScene extends Phaser.Scene {
         });
     }
     
+    showLoopMessage() {
+        // Show brief message when looping back
+        const loopText = this.add.text(
+            CONFIG.width / 2,
+            CONFIG.height / 2,
+            'RETURNING TO MILKY WAY GALAXY...\n\nTHE JOURNEY CONTINUES!',
+            {
+                fontSize: '28px',
+                fill: '#00ffff',
+                align: 'center',
+                stroke: '#000000',
+                strokeThickness: 4
+            }
+        );
+        loopText.setOrigin(0.5);
+        loopText.setDepth(1000);
+        
+        // Fade out message after 2 seconds
+        this.tweens.add({
+            targets: loopText,
+            alpha: 0,
+            duration: 2000,
+            delay: 2000,
+            onComplete: () => {
+                loopText.destroy();
+            }
+        });
+    }
+    
     updateUI() {
         const universe = UNIVERSES[currentUniverseIndex];
         const planet = universe.planets[currentPlanetIndex];
         
-        document.getElementById('universe-name').textContent = universe.name;
+        // Show loop count if completed at least one full loop
+        const loopText = universeLoopCount > 0 ? ` (Loop ${universeLoopCount + 1})` : '';
+        document.getElementById('universe-name').textContent = universe.name + loopText;
         document.getElementById('planet-name').textContent = planet.name;
         document.getElementById('distance').textContent = totalDistance;
         
