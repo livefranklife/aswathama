@@ -374,21 +374,117 @@ class WorldGenerator {
     }
     
     createPlanetEffects(planetData) {
-        // Create planet-specific visual effects
+        // Create planet-specific visual effects based on type
+        const universe = UNIVERSES[currentUniverseIndex];
         
-        // Black hole special effects
+        if (planetData.type === 'comet') {
+            this.createCometEffect(planetData);
+        } else if (planetData.type === 'gas_giant') {
+            this.createGasGiantEffect(planetData);
+        } else if (planetData.type === 'blackhole') {
+            this.createBlackHoleEffect();
+        } else if (planetData.type === 'nebula') {
+            this.createNebulaEffect(planetData.color);
+        } else if (planetData.type === 'parallel') {
+            this.createParallelEffect();
+        } else if (planetData.type === 'final') {
+            this.createFinalEffect();
+        }
+        
+        // Legacy checks for compatibility
         if (planetData.name.includes('Black Hole') || planetData.name.includes('Event Horizon')) {
             this.createBlackHoleEffect();
         }
-        
-        // Nebula effects
         if (planetData.name.includes('Nebula') || planetData.name.includes('Stardust')) {
             this.createNebulaEffect(planetData.color);
         }
-        
-        // Energy field effects
         if (planetData.name.includes('Energy')) {
             this.createEnergyFieldEffect();
+        }
+    }
+    
+    createCometEffect(planetData) {
+        // Icy comet particles
+        try {
+            const particles = this.scene.add.particles(0, 0, 'particle', {
+                x: { min: 0, max: CONFIG.width },
+                y: { min: 0, max: CONFIG.height },
+                speed: { min: 30, max: 80 },
+                scale: { start: 0.8, end: 0 },
+                tint: [0x87ceeb, 0xb0e0e6, 0xffffff],
+                lifespan: 2000,
+                frequency: 150,
+                gravityY: 50
+            });
+            if (particles) {
+                particles.setDepth(-25);
+            }
+        } catch (error) {
+            console.warn('Could not create comet effect:', error);
+        }
+    }
+    
+    createGasGiantEffect(planetData) {
+        // Swirling gas clouds
+        for (let i = 0; i < 3; i++) {
+            const x = Phaser.Math.Between(0, CONFIG.width);
+            const y = Phaser.Math.Between(0, CONFIG.height);
+            const size = Phaser.Math.Between(80, 150);
+            
+            const cloud = this.scene.add.ellipse(x, y, size, size * 0.5, planetData.color, 0.4);
+            cloud.setDepth(-30);
+            
+            this.scene.tweens.add({
+                targets: cloud,
+                rotation: Math.PI * 2,
+                duration: Phaser.Math.Between(5000, 10000),
+                repeat: -1,
+                ease: 'Linear'
+            });
+        }
+    }
+    
+    createParallelEffect() {
+        // Quantum distortion waves
+        for (let i = 0; i < 3; i++) {
+            const wave = this.scene.add.rectangle(
+                CONFIG.width / 2,
+                CONFIG.height / 2 + (i - 1) * 100,
+                CONFIG.width,
+                5,
+                0xff00ff,
+                0.5
+            );
+            wave.setDepth(-20);
+            
+            this.scene.tweens.add({
+                targets: wave,
+                alpha: { from: 0.2, to: 0.8 },
+                duration: 2000,
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
+            });
+        }
+    }
+    
+    createFinalEffect() {
+        // Golden victory particles
+        try {
+            const particles = this.scene.add.particles(0, 0, 'particle', {
+                x: { min: 0, max: CONFIG.width },
+                y: { min: 0, max: CONFIG.height },
+                speed: { min: 20, max: 60 },
+                scale: { start: 1, end: 0 },
+                tint: [0xffff00, 0xffd700, 0xffaa00],
+                lifespan: 3000,
+                frequency: 200
+            });
+            if (particles) {
+                particles.setDepth(-25);
+            }
+        } catch (error) {
+            console.warn('Could not create final effect:', error);
         }
     }
     
