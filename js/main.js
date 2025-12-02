@@ -278,7 +278,7 @@ class GameScene extends Phaser.Scene {
     }
     
     travelToNextUniverse() {
-        // Create warp animation
+        // Create Interstellar-style universe travel sequence
         this.vehicle.travelToNextUniverse();
         
         // Update universe/planet indices
@@ -299,38 +299,72 @@ class GameScene extends Phaser.Scene {
         }
         
         // Calculate distance traveled
-        totalDistance += Phaser.Math.Between(10, 50);
+        totalDistance += Phaser.Math.Between(50, 150);
         
-        // Transition to new world
-        this.cameras.main.fadeOut(1000, 0, 0, 0);
+        // Create cinematic Interstellar travel sequence
+        this.createInterstellarTravelSequence();
+    }
+    
+    createInterstellarTravelSequence() {
+        // Phase 1: Acceleration and warp tunnel
+        this.cameras.main.fadeOut(500, 0, 0, 0);
         
-        this.time.delayedCall(1000, () => {
-            // Load new world
-            const newUniverse = UNIVERSES[currentUniverseIndex];
-            const newPlanet = newUniverse.planets[currentPlanetIndex];
+        this.time.delayedCall(500, () => {
+            // Create star field warp effect
+            const starField = this.add.particles(0, 0, 'particle', {
+                x: { min: 0, max: CONFIG.width },
+                y: { min: 0, max: CONFIG.height },
+                speed: { min: 200, max: 500 },
+                scale: { start: 2, end: 0 },
+                tint: [0xffffff, 0x00ffff],
+                lifespan: 2000,
+                frequency: 200
+            });
+            starField.setDepth(-30);
             
-            // Reset player and vehicle positions
-            this.player.setPosition(100, CONFIG.height - 200);
-            this.vehicle.setPosition(CONFIG.width - 150, CONFIG.height - 200);
-            
-            // Create new world
-            this.worldGenerator.createWorld(newPlanet);
-            
-            // Recreate collisions
-            if (this.playerCollider) {
-                this.physics.world.removeCollider(this.playerCollider);
-            }
-            if (this.vehicleCollider) {
-                this.physics.world.removeCollider(this.vehicleCollider);
-            }
-            this.playerCollider = this.physics.add.collider(this.player, this.worldGenerator.getPlatforms());
-            this.vehicleCollider = this.physics.add.collider(this.vehicle, this.worldGenerator.getPlatforms());
-            
-            // Update UI
-            this.updateUI();
-            
-            // Fade in
-            this.cameras.main.fadeIn(1000, 0, 0, 0);
+            // Phase 2: Universe transition
+            this.time.delayedCall(1500, () => {
+                // Load new world
+                const newUniverse = UNIVERSES[currentUniverseIndex];
+                const newPlanet = newUniverse.planets[currentPlanetIndex];
+                
+                // Reset player and vehicle positions
+                this.player.setPosition(100, CONFIG.height - 200);
+                this.vehicle.setPosition(CONFIG.width - 150, CONFIG.height - 200);
+                this.vehicle.setRotation(0); // Reset rotation
+                
+                // Create new world
+                this.worldGenerator.createWorld(newPlanet);
+                
+                // Recreate collisions
+                if (this.playerCollider) {
+                    this.physics.world.removeCollider(this.playerCollider);
+                }
+                if (this.vehicleCollider) {
+                    this.physics.world.removeCollider(this.vehicleCollider);
+                }
+                this.playerCollider = this.physics.add.collider(this.player, this.worldGenerator.getPlatforms());
+                this.vehicleCollider = this.physics.add.collider(this.vehicle, this.worldGenerator.getPlatforms());
+                
+                // Update UI
+                this.updateUI();
+                
+                // Destroy star field
+                if (starField) starField.destroy();
+                
+                // Phase 3: Arrival
+                this.time.delayedCall(500, () => {
+                    // Fade in with zoom effect
+                    this.cameras.main.setZoom(0.5);
+                    this.cameras.main.fadeIn(1000, 0, 0, 0);
+                    this.tweens.add({
+                        targets: this.cameras.main,
+                        zoom: 1,
+                        duration: 1000,
+                        ease: 'Power2'
+                    });
+                });
+            });
         });
     }
     

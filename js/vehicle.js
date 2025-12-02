@@ -12,16 +12,18 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
         // Set vehicle depth lower than player
         this.setDepth(5);
         
-        // Movement properties - Electric Rocket
-        this.baseSpeed = 200;
-        this.speed = 200;
-        this.minSpeed = 100;
-        this.maxSpeed = 800;
+        // Movement properties - Interstellar Jet
+        this.baseSpeed = 300;
+        this.speed = 300;
+        this.minSpeed = 150;
+        this.maxSpeed = 1200; // Faster for jet-like feel
         this.speedMultiplier = 1.0;
-        this.boostSpeed = 600;
+        this.boostSpeed = 900;
         this.isActive = false;
         this.playerInside = false;
         this.currentSpeedLevel = 1; // 1-5 speed levels
+        this.rotationSpeed = 0; // For banking/tilting
+        this.targetRotation = 0;
         
         // Create vehicle graphics
         this.createVehicleGraphics();
@@ -45,52 +47,69 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
             
             const graphics = this.scene.add.graphics();
             
-            // Electric Rocket Design with transparent cockpit for player visibility
-            // Main rocket body (sleek, electric blue)
-            graphics.fillStyle(0x00aaff);
-            graphics.fillRect(10, 0, 60, 80);
+            // Interstellar-style Flying Jet Design
+            // Main fuselage (sleek, elongated like a jet)
+            graphics.fillStyle(0x2a2a3a);
+            graphics.fillRect(5, 20, 70, 40);
             
-            // Rocket nose cone
-            graphics.fillStyle(0x00ffff);
-            graphics.fillTriangle(40, 0, 20, 20, 60, 20);
+            // Nose cone (sharp, aerodynamic)
+            graphics.fillStyle(0x3a3a4a);
+            graphics.fillTriangle(40, 0, 15, 20, 65, 20);
             
-            // Cockpit window (transparent with glow border for player visibility)
-            graphics.fillStyle(0x00ffff, 0.3); // Semi-transparent
-            graphics.fillRect(25, 15, 30, 25);
-            // Cockpit border glow
-            graphics.lineStyle(2, 0x00ffff, 0.8);
-            graphics.strokeRect(25, 15, 30, 25);
+            // Cockpit (large, Interstellar-style)
+            graphics.fillStyle(0x1a1a2a, 0.4);
+            graphics.fillRect(20, 15, 40, 25);
+            // Cockpit glass with reflection
+            graphics.fillStyle(0x00aaff, 0.6);
+            graphics.fillRect(22, 17, 36, 21);
+            // Cockpit frame
+            graphics.lineStyle(2, 0xffffff, 0.8);
+            graphics.strokeRect(20, 15, 40, 25);
             
-            // Electric panels on sides
-            graphics.fillStyle(0x00ff00);
-            graphics.fillRect(5, 25, 8, 15);
-            graphics.fillRect(67, 25, 8, 15);
-            graphics.fillRect(5, 45, 8, 15);
-            graphics.fillRect(67, 45, 8, 15);
+            // Wings (swept back, jet-like)
+            graphics.fillStyle(0x2a2a3a);
+            // Left wing
+            graphics.fillTriangle(5, 30, -15, 50, 5, 50);
+            // Right wing
+            graphics.fillTriangle(75, 30, 95, 50, 75, 50);
             
-            // Rocket fins
-            graphics.fillStyle(0x0088ff);
-            graphics.fillRect(-5, 50, 15, 20);
-            graphics.fillRect(70, 50, 15, 20);
+            // Wing details
+            graphics.lineStyle(1, 0x00ffff, 0.5);
+            graphics.lineBetween(-10, 45, 5, 45);
+            graphics.lineBetween(75, 45, 90, 45);
             
-            // Main engine (electric blue glow)
-            graphics.fillStyle(0x00ffff);
-            graphics.fillRect(25, 75, 30, 15);
+            // Engine nacelles (Interstellar style)
+            graphics.fillStyle(0x1a1a1a);
+            graphics.fillRect(0, 55, 20, 15);
+            graphics.fillRect(60, 55, 20, 15);
             
-            // Secondary engines
-            graphics.fillStyle(0x00ff00);
-            graphics.fillRect(10, 80, 12, 10);
-            graphics.fillRect(58, 80, 12, 10);
+            // Engine glow (blue-white, like Interstellar)
+            graphics.fillStyle(0x00ffff, 0.8);
+            graphics.fillRect(2, 57, 16, 11);
+            graphics.fillRect(62, 57, 16, 11);
+            // Inner engine core
+            graphics.fillStyle(0xffffff, 0.9);
+            graphics.fillRect(5, 60, 10, 5);
+            graphics.fillRect(65, 60, 10, 5);
             
-            graphics.generateTexture('vehicle', 80, 100);
+            // Tail fins (vertical stabilizers)
+            graphics.fillStyle(0x2a2a3a);
+            graphics.fillRect(30, 55, 8, 20);
+            graphics.fillRect(42, 55, 8, 20);
+            
+            // Details and panels
+            graphics.lineStyle(1, 0x00ffff, 0.4);
+            graphics.strokeRect(10, 25, 60, 30);
+            
+            graphics.generateTexture('vehicle', 100, 80);
             graphics.destroy();
         } catch (error) {
             console.error('Error creating vehicle graphics:', error);
             // Create a simple fallback
             const graphics = this.scene.add.graphics();
-            graphics.fillStyle(0x00aaff);
-            graphics.fillRect(0, 0, 60, 80);
-            graphics.generateTexture('vehicle', 60, 80);
+            graphics.fillStyle(0x2a2a3a);
+            graphics.fillRect(0, 0, 70, 50);
+            graphics.generateTexture('vehicle', 70, 50);
             graphics.destroy();
         }
     }
@@ -120,54 +139,49 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
     }
     
     createParticles() {
-        // Create electric rocket engine trail
+        // Create Interstellar-style jet engine trails
         try {
-            // Main engine trail (electric blue)
-            this.trail = this.scene.add.particles(this.x, this.y, 'particle', {
-                speed: { min: 80, max: 150 },
-                scale: { start: 0.5, end: 0 },
-                tint: [0x00ffff, 0x00ff00, 0xffffff],
+            // Left engine trail (blue-white, like Interstellar)
+            this.trail1 = this.scene.add.particles(this.x, this.y, 'particle', {
+                speed: { min: 100, max: 200 },
+                scale: { start: 0.8, end: 0 },
+                tint: [0x00ffff, 0xffffff, 0x00aaff],
+                lifespan: 500,
+                frequency: 100,
+                follow: this,
+                followOffset: { x: -10, y: 50 }
+            });
+            
+            // Right engine trail
+            this.trail2 = this.scene.add.particles(this.x, this.y, 'particle', {
+                speed: { min: 100, max: 200 },
+                scale: { start: 0.8, end: 0 },
+                tint: [0x00ffff, 0xffffff, 0x00aaff],
+                lifespan: 500,
+                frequency: 100,
+                follow: this,
+                followOffset: { x: 10, y: 50 }
+            });
+            
+            // Center exhaust (when boosting)
+            this.boostTrail = this.scene.add.particles(this.x, this.y, 'particle', {
+                speed: { min: 150, max: 300 },
+                scale: { start: 1.2, end: 0 },
+                tint: [0xffffff, 0x00ffff, 0xff00ff],
                 lifespan: 400,
-                frequency: 80,
+                frequency: 150,
                 follow: this,
-                followOffset: { x: 0, y: 45 }
+                followOffset: { x: 0, y: 55 }
             });
             
-            // Side engine trails
-            this.sideTrail1 = this.scene.add.particles(this.x, this.y, 'particle', {
-                speed: { min: 50, max: 100 },
-                scale: { start: 0.3, end: 0 },
-                tint: [0x00ff00, 0x00ffff],
-                lifespan: 300,
-                frequency: 60,
-                follow: this,
-                followOffset: { x: -20, y: 50 }
-            });
-            
-            this.sideTrail2 = this.scene.add.particles(this.x, this.y, 'particle', {
-                speed: { min: 50, max: 100 },
-                scale: { start: 0.3, end: 0 },
-                tint: [0x00ff00, 0x00ffff],
-                lifespan: 300,
-                frequency: 60,
-                follow: this,
-                followOffset: { x: 20, y: 50 }
-            });
-            
-            if (this.trail) {
-                this.trail.stop();
-            }
-            if (this.sideTrail1) {
-                this.sideTrail1.stop();
-            }
-            if (this.sideTrail2) {
-                this.sideTrail2.stop();
-            }
+            if (this.trail1) this.trail1.stop();
+            if (this.trail2) this.trail2.stop();
+            if (this.boostTrail) this.boostTrail.stop();
         } catch (error) {
             console.warn('Could not create particle trail:', error);
-            this.trail = null;
-            this.sideTrail1 = null;
-            this.sideTrail2 = null;
+            this.trail1 = null;
+            this.trail2 = null;
+            this.boostTrail = null;
         }
     }
     
@@ -177,7 +191,8 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
         }
         
         // Boost with Shift
-        let currentSpeed = cursors.shift && cursors.shift.isDown ? this.boostSpeed : this.speed;
+        const isBoosting = cursors.shift && cursors.shift.isDown;
+        let currentSpeed = isBoosting ? this.boostSpeed : this.speed;
         
         let velocityX = 0;
         let velocityY = 0;
@@ -186,73 +201,79 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
         const gameWidth = this.scene.scale ? this.scene.scale.width : CONFIG.width;
         const centerX = gameWidth / 2;
         
-        // Movement controls - Left, Right, Center positioning
+        // Movement controls - Jet-like flying with banking
         const leftPressed = cursors.left && cursors.left.isDown;
         const rightPressed = cursors.right && cursors.right.isDown;
         const aPressed = cursors.a && cursors.a.isDown;
         const dPressed = cursors.d && cursors.d.isDown;
         
+        // Banking/tilting when turning (like a real jet)
         if (leftPressed || aPressed) {
-            // Move left
             velocityX = -currentSpeed;
+            this.targetRotation = -0.3; // Bank left
         } else if (rightPressed || dPressed) {
-            // Move right
             velocityX = currentSpeed;
+            this.targetRotation = 0.3; // Bank right
         } else {
-            // Center positioning - automatically center when no horizontal input
+            // Center positioning - smoothly return to center
             const distanceToCenter = centerX - this.x;
-            const threshold = 5; // Stop when within 5 pixels of center
+            const threshold = 5;
             if (Math.abs(distanceToCenter) > threshold) {
-                // Smooth centering with acceleration
-                const centeringSpeed = Math.min(currentSpeed * 0.6, Math.abs(distanceToCenter) * 0.15);
+                const centeringSpeed = Math.min(currentSpeed * 0.7, Math.abs(distanceToCenter) * 0.2);
                 velocityX = Math.sign(distanceToCenter) * centeringSpeed;
+                this.targetRotation = Math.sign(distanceToCenter) * 0.15;
             } else {
-                // Snap to center if very close
                 this.setX(centerX);
                 velocityX = 0;
+                this.targetRotation = 0; // Level flight
             }
         }
         
-        // Vertical movement
+        // Vertical movement (smooth like a jet)
         const upPressed = cursors.up && cursors.up.isDown;
         const downPressed = cursors.down && cursors.down.isDown;
         const wPressed = cursors.w && cursors.w.isDown;
         const sPressed = cursors.s && cursors.s.isDown;
         
         if (upPressed || wPressed) {
-            velocityY = -currentSpeed;
+            velocityY = -currentSpeed * 0.8; // Slightly slower vertical
         } else if (downPressed || sPressed) {
-            velocityY = currentSpeed;
+            velocityY = currentSpeed * 0.8;
         }
+        
+        // Smooth rotation (banking effect)
+        this.rotationSpeed += (this.targetRotation - this.rotation) * 0.1;
+        this.rotationSpeed *= 0.9; // Damping
+        this.rotation += this.rotationSpeed;
+        
+        // Limit rotation
+        if (this.rotation > 0.5) this.rotation = 0.5;
+        if (this.rotation < -0.5) this.rotation = -0.5;
         
         this.setVelocity(velocityX, velocityY);
         
-        // Update particle trail intensity based on speed
+        // Update particle trails
         const isMoving = velocityX !== 0 || velocityY !== 0;
         if (isMoving) {
             this.play('vehicle-fly', true);
-            if (this.trail) {
-                this.trail.start();
-                // Adjust particle frequency based on speed
-                this.trail.setFrequency(Math.max(30, 80 * (this.speed / this.maxSpeed)));
+            if (this.trail1) {
+                this.trail1.start();
+                this.trail1.setFrequency(Math.max(50, 120 * (this.speed / this.maxSpeed)));
             }
-            if (this.sideTrail1) {
-                this.sideTrail1.start();
+            if (this.trail2) {
+                this.trail2.start();
+                this.trail2.setFrequency(Math.max(50, 120 * (this.speed / this.maxSpeed)));
             }
-            if (this.sideTrail2) {
-                this.sideTrail2.start();
+            if (isBoosting && this.boostTrail) {
+                this.boostTrail.start();
+            } else if (this.boostTrail) {
+                this.boostTrail.stop();
             }
         } else {
             this.play('vehicle-idle', true);
-            if (this.trail) {
-                this.trail.stop();
-            }
-            if (this.sideTrail1) {
-                this.sideTrail1.stop();
-            }
-            if (this.sideTrail2) {
-                this.sideTrail2.stop();
-            }
+            if (this.trail1) this.trail1.stop();
+            if (this.trail2) this.trail2.stop();
+            if (this.boostTrail) this.boostTrail.stop();
         }
         
         // Update visual speed indicator
@@ -354,14 +375,17 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
         this.isActive = false;
         this.playerInside = false;
         this.setTint(0xffffff);
-        if (this.trail) {
-            this.trail.stop();
+        this.setRotation(0); // Reset rotation
+        this.targetRotation = 0;
+        this.rotationSpeed = 0;
+        if (this.trail1) {
+            this.trail1.stop();
         }
-        if (this.sideTrail1) {
-            this.sideTrail1.stop();
+        if (this.trail2) {
+            this.trail2.stop();
         }
-        if (this.sideTrail2) {
-            this.sideTrail2.stop();
+        if (this.boostTrail) {
+            this.boostTrail.stop();
         }
         this.setVelocity(0, 0);
         // Re-enable gravity when vehicle is inactive
@@ -375,47 +399,64 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
     }
     
     travelToNextUniverse() {
-        // Create enhanced warp effect for universe travel
+        // Create Interstellar-style universe travel effect
         try {
-            // Main warp particles
-            const warpEffect = this.scene.add.particles(this.x, this.y, 'particle', {
-                speed: { min: 200, max: 400 },
-                scale: { start: 1, end: 0 },
-                tint: [0x00ffff, 0xff00ff, 0xffffff, 0x00ff00],
-                lifespan: 1000,
-                frequency: 20,
-                emitZone: { type: 'edge', source: new Phaser.Geom.Circle(0, 0, 60), quantity: 100 }
+            // Main warp tunnel effect (like Interstellar)
+            const warpTunnel = this.scene.add.particles(this.x, this.y, 'particle', {
+                speed: { min: 300, max: 600 },
+                scale: { start: 2, end: 0 },
+                tint: [0x00ffff, 0xffffff, 0x00aaff, 0xff00ff],
+                lifespan: 1500,
+                frequency: 50,
+                emitZone: { type: 'edge', source: new Phaser.Geom.Circle(0, 0, 80), quantity: 200 }
             });
             
-            // Electric energy burst
-            const energyBurst = this.scene.add.particles(this.x, this.y, 'particle', {
-                speed: { min: 300, max: 500 },
+            // Stellar streaks (Interstellar effect)
+            const stellarStreaks = this.scene.add.particles(this.x, this.y, 'particle', {
+                speed: { min: 400, max: 800 },
+                scale: { start: 3, end: 0 },
+                tint: [0xffffff, 0x00ffff],
+                lifespan: 1200,
+                frequency: 40,
+                emitZone: { type: 'edge', source: new Phaser.Geom.Circle(0, 0, 100), quantity: 150 }
+            });
+            
+            // Time dilation effect
+            const timeDilation = this.scene.add.particles(this.x, this.y, 'particle', {
+                speed: { min: 200, max: 500 },
                 scale: { start: 1.5, end: 0 },
-                tint: [0x00ffff, 0x00ff00],
-                lifespan: 800,
-                frequency: 30,
-                emitZone: { type: 'edge', source: new Phaser.Geom.Circle(0, 0, 40), quantity: 50 }
+                tint: [0xff00ff, 0x00ffff, 0xffffff],
+                lifespan: 2000,
+                frequency: 60,
+                emitZone: { type: 'edge', source: new Phaser.Geom.Circle(0, 0, 120), quantity: 100 }
             });
             
-            // Rocket glow effect
+            // Jet acceleration effect
             this.scene.tweens.add({
                 targets: this,
-                scaleX: 1.5,
-                scaleY: 1.5,
-                alpha: 0.5,
-                duration: 500,
-                yoyo: true,
+                scaleX: 2,
+                scaleY: 2,
+                alpha: 0.3,
+                rotation: Math.PI * 2,
+                duration: 800,
+                ease: 'Power3'
+            });
+            
+            // Create star field warp effect
+            this.scene.tweens.add({
+                targets: this.scene.cameras.main,
+                zoom: 3,
+                duration: 1000,
                 ease: 'Power2'
             });
             
-            if (warpEffect) {
-                this.scene.time.delayedCall(1000, () => {
-                    if (warpEffect && warpEffect.destroy) {
-                        warpEffect.destroy();
-                    }
-                    if (energyBurst && energyBurst.destroy) {
-                        energyBurst.destroy();
-                    }
+            if (warpTunnel) {
+                this.scene.time.delayedCall(1500, () => {
+                    if (warpTunnel && warpTunnel.destroy) warpTunnel.destroy();
+                    if (stellarStreaks && stellarStreaks.destroy) stellarStreaks.destroy();
+                    if (timeDilation && timeDilation.destroy) timeDilation.destroy();
+                    // Reset camera zoom
+                    this.scene.cameras.main.setZoom(1);
                 });
             }
         } catch (error) {
