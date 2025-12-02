@@ -101,6 +101,8 @@ class GameScene extends Phaser.Scene {
         if (this.vehicle.isActive && this.vehicle.playerInside) {
             // Player is in vehicle
             this.vehicle.update(this.controls);
+            // Update player position inside vehicle
+            this.player.update(this.controls);
             this.cameras.main.startFollow(this.vehicle);
         } else {
             // Player is on foot
@@ -124,6 +126,8 @@ class GameScene extends Phaser.Scene {
                 // Enter vehicle
                 vehicle.activate();
                 player.enterVehicle(vehicle);
+                // Position player inside vehicle immediately
+                player.setPosition(vehicle.x, vehicle.y - 10);
             }
         }
     }

@@ -17,6 +17,10 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.isOnGround = false;
         this.canJump = true;
         
+        // Vehicle state
+        this.inVehicle = false;
+        this.vehicle = null;
+        
         // Animation states
         this.facingRight = true;
         
@@ -94,6 +98,12 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     }
     
     update(cursors) {
+        // If player is in vehicle, update position relative to vehicle
+        if (this.inVehicle) {
+            this.updateInVehicle();
+            return;
+        }
+        
         // Horizontal movement
         if (cursors.left.isDown || cursors.a.isDown) {
             this.setVelocityX(-this.speed);
@@ -134,16 +144,45 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     }
     
     enterVehicle(vehicle) {
-        // Hide player when entering vehicle
-        this.setVisible(false);
-        this.setActive(false);
+        // Keep player visible inside vehicle cockpit
+        this.inVehicle = true;
+        this.vehicle = vehicle;
+        // Make player smaller to fit in cockpit
+        this.setScale(0.5);
+        // Set player depth higher than vehicle so it appears on top
+        this.setDepth(10);
+        // Disable physics when in vehicle
+        this.body.setAllowGravity(false);
+        this.setVelocity(0, 0);
     }
     
     exitVehicle(x, y) {
-        // Show player when exiting vehicle
+        // Exit vehicle and restore normal size
+        this.inVehicle = false;
+        this.vehicle = null;
         this.setPosition(x, y);
+        this.setScale(0.8); // Restore normal scale
         this.setVisible(true);
         this.setActive(true);
+        // Reset depth
+        this.setDepth(0);
+        // Re-enable physics
+        this.body.setAllowGravity(true);
+    }
+    
+    updateInVehicle() {
+        if (this.inVehicle && this.vehicle) {
+            // Position player inside vehicle cockpit (slightly above center)
+            this.setPosition(this.vehicle.x, this.vehicle.y - 10);
+            // Make player face the same direction as vehicle movement
+            if (this.vehicle.body.velocity.x < 0) {
+                this.setFlipX(true);
+            } else if (this.vehicle.body.velocity.x > 0) {
+                this.setFlipX(false);
+            }
+            // Play idle animation when in vehicle
+            this.play('idle', true);
+        }
     }
 }
 

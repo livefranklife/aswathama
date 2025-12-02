@@ -9,6 +9,8 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
         // Vehicle properties
         this.setCollideWorldBounds(true);
         this.setScale(1.2);
+        // Set vehicle depth lower than player
+        this.setDepth(5);
         
         // Movement properties - Electric Rocket
         this.baseSpeed = 200;
@@ -37,7 +39,7 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
     createVehicleGraphics() {
         const graphics = this.scene.add.graphics();
         
-        // Electric Rocket Design
+        // Electric Rocket Design with transparent cockpit for player visibility
         // Main rocket body (sleek, electric blue)
         graphics.fillStyle(0x00aaff);
         graphics.fillRect(10, 0, 60, 80);
@@ -46,11 +48,12 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
         graphics.fillStyle(0x00ffff);
         graphics.fillTriangle(40, 0, 20, 20, 60, 20);
         
-        // Cockpit window (electric glow)
-        graphics.fillStyle(0x00ffff);
-        graphics.fillRect(25, 15, 30, 20);
-        graphics.fillStyle(0xffffff);
-        graphics.fillRect(28, 18, 24, 14);
+        // Cockpit window (transparent with glow border for player visibility)
+        graphics.fillStyle(0x00ffff, 0.3); // Semi-transparent
+        graphics.fillRect(25, 15, 30, 25);
+        // Cockpit border glow
+        graphics.lineStyle(2, 0x00ffff, 0.8);
+        graphics.strokeRect(25, 15, 30, 25);
         
         // Electric panels on sides
         graphics.fillStyle(0x00ff00);
