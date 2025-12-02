@@ -44,7 +44,7 @@
             padding: 15px;
             border-radius: 10px;
             border: 2px solid rgba(0, 255, 255, 0.5);
-            max-width: 350px;
+            max-width: 300px;
             animation: pulseGlow 2s ease-in-out infinite;
         }
         
@@ -100,25 +100,35 @@
         }
         
         #controls-panel {
-            margin-top: 15px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(0, 255, 255, 0.3);
-            font-size: 14px;
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            font-size: 10px;
+            max-width: 200px;
+            z-index: 1000;
+            pointer-events: none;
         }
         
         #controls-panel .control-section {
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
         
         #controls-panel .control-title {
             color: #ffff00;
             font-weight: bold;
-            margin-bottom: 4px;
+            font-size: 11px;
+            margin-bottom: 2px;
         }
         
         #controls-panel .control-item {
-            margin-left: 10px;
+            margin-left: 5px;
             color: #00ffff;
+            font-size: 9px;
+            line-height: 1.3;
         }
         
         #instructions {
@@ -156,23 +166,24 @@
                 </div>
             </div>
             
-            <div id="controls-panel">
-                <div class="control-section">
-                    <div class="control-title">Movement:</div>
-                    <div class="control-item">Arrow Keys / WASD - Move</div>
-                    <div class="control-item">Space / W - Jump (on foot)</div>
-                </div>
-                <div class="control-section">
-                    <div class="control-title">Electric Rocket:</div>
-                    <div class="control-item">E - Enter/Exit Rocket</div>
-                    <div class="control-item">Arrow Keys / WASD - Move</div>
-                    <div class="control-item">Q - Decrease Speed | =/+ - Increase Speed</div>
-                    <div class="control-item">Shift - Boost | R - Travel Universe</div>
-                </div>
-                <div class="control-section">
-                    <div class="control-title">Special Actions:</div>
-                    <div class="control-item">T - Interstellar/Time Travel</div>
-                </div>
+        </div>
+        
+        <div id="controls-panel">
+            <div class="control-section">
+                <div class="control-title">Movement:</div>
+                <div class="control-item">WASD/Arrows - Move</div>
+                <div class="control-item">Space/W - Jump</div>
+            </div>
+            <div class="control-section">
+                <div class="control-title">Rocket:</div>
+                <div class="control-item">E - Enter/Exit</div>
+                <div class="control-item">Q/= - Speed</div>
+                <div class="control-item">Shift - Boost</div>
+                <div class="control-item">R - Travel</div>
+            </div>
+            <div class="control-section">
+                <div class="control-title">Special:</div>
+                <div class="control-item">T - Travel/Time</div>
             </div>
         </div>
         
