@@ -1,25 +1,37 @@
 {
-  "name": "aswathama-game",
+  "name": "aswathama",
   "version": "1.0.0",
-  "description": "Ashwatthama Alpha - A universe exploration game built with Phaser",
+  "description": "A dynamic, interactive space exploration game where you control a rocket and travel through multiple universes, galaxies, and planets. Experience interstellar travel with stunning visual effects, parallax scrolling, and an infinite looping universe.",
   "main": "index.html",
   "scripts": {
     "start": "npx http-server -p 8000 -c-1",
     "dev": "npx http-server -p 8000 -c-1"
   },
   "keywords": [
-    "phaser",
     "game",
+    "space",
     "universe",
-    "exploration"
+    "exploration",
+    "rocket",
+    "interactive",
+    "javascript",
+    "html5",
+    "css3",
+    "galaxy",
+    "cosmos",
+    "interstellar",
+    "travel",
+    "dynamic",
+    "parallax"
   ],
   "author": "livefranklife",
   "license": "MIT",
-  "dependencies": {
-    "phaser": "^3.80.1"
+  "homepage": "https://aswathama-nu.vercel.app/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/livefranklife/aswathama.git"
   },
-  "devDependencies": {
-    "http-server": "^14.1.1"
+  "bugs": {
+    "url": "https://github.com/livefranklife/aswathama/issues"
   }
 }
-
