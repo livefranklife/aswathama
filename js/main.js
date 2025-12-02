@@ -33,7 +33,7 @@ class GameScene extends Phaser.Scene {
             
             // Create vehicle
             this.vehicle = new Vehicle(this, CONFIG.width - 150, CONFIG.height - 200);
-        
+            
             // Create collisions and store references
             this.playerCollider = this.physics.add.collider(this.player, this.worldGenerator.getPlatforms());
             this.vehicleCollider = this.physics.add.collider(this.vehicle, this.worldGenerator.getPlatforms());
