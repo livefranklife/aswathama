@@ -12,10 +12,10 @@
         }
         
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
             background: #000;
             font-family: 'Arial', sans-serif;
             overflow: hidden;
@@ -23,12 +23,17 @@
         
         #game-container {
             position: relative;
-            width: 1200px;
-            height: 800px;
+            width: 100vw;
+            height: 100vh;
             border: 3px solid #00ffff;
             border-radius: 10px;
             box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
             overflow: hidden;
+        }
+        
+        body {
+            padding: 0;
+            margin: 0;
         }
         
         /* Galaxy Background */
@@ -289,41 +294,66 @@
             galaxyBg.appendChild(star);
         }
         
-        // Rocket control
+        // Rocket control with infinite loop world
         const rocket = document.getElementById('rocket');
         const gameContainer = document.getElementById('game-container');
-        const containerRect = gameContainer.getBoundingClientRect();
-        let rocketX = containerRect.width / 2; // pixels from left
-        let rocketY = containerRect.height / 2; // pixels from top
+        
+        function getContainerSize() {
+            return {
+                width: window.innerWidth,
+                height: window.innerHeight
+            };
+        }
+        
+        let size = getContainerSize();
+        let rocketX = size.width / 2; // pixels from left
+        let rocketY = size.height / 2; // pixels from top
         let rotation = 0;
-        const speed = 5; // pixels per frame
+        const speed = 8; // pixels per frame - faster for larger area
         let keys = {};
         
-        // Update rocket position
+        // Update rocket position with infinite loop
         function updateRocket() {
             let moved = false;
             let newRotation = rotation;
+            size = getContainerSize(); // Update size on each frame
             
-            // Handle movement - allow full screen movement
+            // Handle movement with wraparound (infinite loop)
             if (keys['ArrowUp'] || keys['w'] || keys['W']) {
-                rocketY = Math.max(40, rocketY - speed); // 40px from top to keep rocket visible
+                rocketY -= speed;
                 newRotation = -15;
                 moved = true;
+                // Loop to bottom when going off top
+                if (rocketY < -40) {
+                    rocketY = size.height + 40;
+                }
             }
             if (keys['ArrowDown'] || keys['s'] || keys['S']) {
-                rocketY = Math.min(containerRect.height - 40, rocketY + speed); // 40px from bottom
+                rocketY += speed;
                 newRotation = 15;
                 moved = true;
+                // Loop to top when going off bottom
+                if (rocketY > size.height + 40) {
+                    rocketY = -40;
+                }
             }
             if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
-                rocketX = Math.max(30, rocketX - speed); // 30px from left
+                rocketX -= speed;
                 newRotation = -30;
                 moved = true;
+                // Loop to right when going off left
+                if (rocketX < -30) {
+                    rocketX = size.width + 30;
+                }
             }
             if (keys['ArrowRight'] || keys['d'] || keys['D']) {
-                rocketX = Math.min(containerRect.width - 30, rocketX + speed); // 30px from right
+                rocketX += speed;
                 newRotation = 30;
                 moved = true;
+                // Loop to left when going off right
+                if (rocketX > size.width + 30) {
+                    rocketX = -30;
+                }
             }
             
             // Handle diagonal movement rotation
@@ -349,14 +379,14 @@
             
             // Update distance when moving
             if (moved) {
-                distance += 0.1;
+                distance += 0.15;
                 updateUI();
             }
         }
         
-        // Update container rect on window resize
+        // Update on window resize
         window.addEventListener('resize', () => {
-            containerRect = gameContainer.getBoundingClientRect();
+            size = getContainerSize();
         });
         
         // Keyboard event listeners
