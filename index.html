@@ -47,12 +47,25 @@
             position: absolute;
             background: white;
             border-radius: 50%;
-            animation: twinkle 3s infinite;
+            animation: twinkle 3s infinite, driftStar 20s infinite linear;
+        }
+        
+        .star-fast {
+            animation: twinkle 2s infinite, driftStar 10s infinite linear;
+        }
+        
+        .star-slow {
+            animation: twinkle 4s infinite, driftStar 30s infinite linear;
         }
         
         @keyframes twinkle {
             0%, 100% { opacity: 0.3; }
             50% { opacity: 1; }
+        }
+        
+        @keyframes driftStar {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100px, 100px); }
         }
         
         /* Nebula clouds */
@@ -92,10 +105,24 @@
         }
         
         @keyframes drift {
-            0%, 100% { transform: translate(0, 0); }
-            25% { transform: translate(30px, -20px); }
-            50% { transform: translate(-20px, 30px); }
-            75% { transform: translate(20px, 20px); }
+            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+            25% { transform: translate(30px, -20px) scale(1.1); opacity: 0.4; }
+            50% { transform: translate(-20px, 30px) scale(0.9); opacity: 0.35; }
+            75% { transform: translate(20px, 20px) scale(1.05); opacity: 0.4; }
+        }
+        
+        /* Dynamic background pulse */
+        #galaxy-background {
+            animation: pulseBg 10s infinite ease-in-out;
+        }
+        
+        @keyframes pulseBg {
+            0%, 100% { 
+                background: radial-gradient(ellipse at center, #1a0033 0%, #000000 70%);
+            }
+            50% { 
+                background: radial-gradient(ellipse at center, #2a0044 0%, #0a0a1a 70%);
+            }
         }
         
         /* Rocket */
@@ -169,6 +196,20 @@
             box-shadow: 0 0 20px #ff6b00, 0 0 30px #ff4500;
         }
         
+        .engine-fire-2 {
+            position: absolute;
+            bottom: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 15px;
+            height: 35px;
+            background: linear-gradient(to bottom, #00ffff, #0066ff);
+            border-radius: 50%;
+            animation: flame2 0.2s infinite;
+            filter: blur(2px);
+            box-shadow: 0 0 15px #00ffff;
+        }
+        
         @keyframes flame {
             0%, 100% { 
                 height: 40px;
@@ -177,6 +218,42 @@
             50% { 
                 height: 50px;
                 width: 25px;
+            }
+        }
+        
+        @keyframes flame2 {
+            0%, 100% { 
+                height: 35px;
+                width: 15px;
+                opacity: 0.8;
+            }
+            50% { 
+                height: 45px;
+                width: 18px;
+                opacity: 1;
+            }
+        }
+        
+        /* Particle trail */
+        .particle-trail {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00ffff;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: fadeTrail 0.5s forwards;
+            box-shadow: 0 0 6px #00ffff;
+        }
+        
+        @keyframes fadeTrail {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.3);
             }
         }
         
@@ -260,6 +337,7 @@
                     <div class="rocket-wing-right"></div>
                 </div>
                 <div class="engine-fire"></div>
+                <div class="engine-fire-2"></div>
             </div>
         </div>
         
@@ -278,18 +356,30 @@
     </div>
     
     <script>
-        // Create stars
+        // Create dynamic stars with different speeds
         const galaxyBg = document.getElementById('galaxy-background');
-        for (let i = 0; i < 200; i++) {
+        for (let i = 0; i < 300; i++) {
             const star = document.createElement('div');
-            star.className = 'star';
+            const starType = Math.random();
+            if (starType < 0.3) {
+                star.className = 'star star-fast';
+            } else if (starType < 0.6) {
+                star.className = 'star star-slow';
+            } else {
+                star.className = 'star';
+            }
             star.style.width = Math.random() * 3 + 1 + 'px';
             star.style.height = star.style.width;
             star.style.left = Math.random() * 100 + '%';
             star.style.top = Math.random() * 100 + '%';
             star.style.animationDelay = Math.random() * 3 + 's';
+            star.style.opacity = Math.random() * 0.7 + 0.3;
             galaxyBg.appendChild(star);
         }
+        
+        // Particle trail system
+        let lastTrailTime = 0;
+        const trailInterval = 50; // milliseconds
         
         // Rocket control with infinite loop
         const rocket = document.getElementById('rocket');
@@ -375,10 +465,35 @@
             rocket.style.top = rocketY + 'px';
             rocket.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
             
-            // Update distance when moving
+            // Create particle trail when moving
             if (moved) {
+                const now = Date.now();
+                if (now - lastTrailTime > trailInterval) {
+                    createParticleTrail(rocketX, rocketY);
+                    lastTrailTime = now;
+                }
+                
                 distance += 0.12;
                 updateUI();
+            }
+        }
+        
+        // Create particle trail effect
+        function createParticleTrail(x, y) {
+            for (let i = 0; i < 3; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle-trail';
+                particle.style.left = (x + (Math.random() - 0.5) * 20) + 'px';
+                particle.style.top = (y + 40 + Math.random() * 10) + 'px';
+                particle.style.animationDelay = (i * 0.1) + 's';
+                galaxyBg.appendChild(particle);
+                
+                // Remove particle after animation
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 500);
             }
         }
         
@@ -416,22 +531,53 @@
         let planetIndex = 0;
         const planets = ["Earth", "Mars", "Jupiter", "Saturn", "Neptune", "Pluto", "Alpha Centauri"];
         
-        // Update UI
+        // Update UI with dynamic effects
         function updateUI() {
-            document.getElementById('universe-name').textContent = universes[currentUniverse];
-            document.getElementById('planet-name').textContent = planets[planetIndex] || "Traveling...";
-            document.getElementById('distance').textContent = Math.floor(distance);
+            const universeEl = document.getElementById('universe-name');
+            const planetEl = document.getElementById('planet-name');
+            const distanceEl = document.getElementById('distance');
+            
+            universeEl.textContent = universes[currentUniverse];
+            planetEl.textContent = planets[planetIndex] || "Traveling...";
+            distanceEl.textContent = Math.floor(distance);
+            
+            // Dynamic color pulse for distance
+            const distanceValue = Math.floor(distance);
+            if (distanceValue % 100 < 5) {
+                distanceEl.style.color = '#ffff00';
+                distanceEl.style.textShadow = '0 0 10px #ffff00';
+                setTimeout(() => {
+                    distanceEl.style.color = '#00ffff';
+                    distanceEl.style.textShadow = '2px 2px 4px rgba(0, 0, 0, 0.8)';
+                }, 500);
+            }
             
             // Auto-advance universe/planet based on distance
             if (distance > 0 && distance % 500 < 1) {
                 planetIndex = (planetIndex + 1) % planets.length;
                 if (planetIndex === 0) {
                     currentUniverse = (currentUniverse + 1) % universes.length;
+                    // Flash effect on universe change
+                    universeEl.style.animation = 'flash 0.5s';
+                    setTimeout(() => {
+                        universeEl.style.animation = '';
+                    }, 500);
                 }
             }
         }
+        
+        // Add flash animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes flash {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.3; color: #ffff00; }
+            }
+        `;
+        document.head.appendChild(style);
         
         updateUI();
     </script>
 </body>
 </html>
+
