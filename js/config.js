@@ -1,7 +1,7 @@
-// Game Configuration
+// Game Configuration - Larger world for more space to travel
 const CONFIG = {
-    width: 1200,
-    height: 800,
+    width: 2400,  // Doubled width for more space
+    height: 1600, // Doubled height for more space
     backgroundColor: '#000000',
     physics: {
         default: 'arcade',

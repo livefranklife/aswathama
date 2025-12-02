@@ -40,6 +40,63 @@
             z-index: 1000;
             pointer-events: none;
             line-height: 1.6;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid rgba(0, 255, 255, 0.5);
+            max-width: 350px;
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 10px rgba(0, 255, 255, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(0, 255, 255, 0.8); }
+        }
+        
+        .ui-stat {
+            margin: 5px 0;
+            padding: 5px;
+            background: rgba(0, 255, 255, 0.1);
+            border-left: 3px solid #00ffff;
+            padding-left: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .ui-stat:hover {
+            background: rgba(0, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+        
+        .special-action {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255, 215, 0, 0.2);
+            border: 2px solid #ffd700;
+            border-radius: 5px;
+            color: #ffd700;
+            font-weight: bold;
+            animation: flash 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        #encounter-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            border: 3px solid #00ffff;
+            border-radius: 15px;
+            padding: 20px;
+            color: #00ffff;
+            z-index: 2000;
+            display: none;
+            min-width: 400px;
+            text-align: center;
         }
         
         #controls-panel {
@@ -82,10 +139,22 @@
 <body>
     <div id="game-container">
         <div id="ui-overlay">
-            <div>Universe: <span id="universe-name">Loading...</span></div>
-            <div>Planet: <span id="planet-name">-</span></div>
-            <div>Distance Traveled: <span id="distance">0</span> light years</div>
-            <div id="speed-indicator" style="display: none;">Speed: 1/5</div>
+            <div class="ui-stat">Universe: <span id="universe-name">Loading...</span></div>
+            <div class="ui-stat">Planet: <span id="planet-name">-</span></div>
+            <div class="ui-stat">Distance: <span id="distance">0</span> light years</div>
+            <div class="ui-stat" id="speed-indicator" style="display: none;">Speed: 1/5</div>
+            <div class="ui-stat" id="encounter-status" style="display: none;">Status: <span id="status-text">-</span></div>
+            
+            <div id="special-actions" style="display: none;">
+                <div class="special-action" id="blackhole-action">
+                    <div>🕳️ BLACK HOLE INTERSTELLAR TRAVEL</div>
+                    <div style="font-size: 12px; margin-top: 5px;">Press T near black hole center</div>
+                </div>
+                <div class="special-action" id="parallel-action">
+                    <div>⏰ PARALLEL UNIVERSE TIME TRAVEL</div>
+                    <div style="font-size: 12px; margin-top: 5px;">Press T to travel through time</div>
+                </div>
+            </div>
             
             <div id="controls-panel">
                 <div class="control-section">
@@ -96,14 +165,23 @@
                 <div class="control-section">
                     <div class="control-title">Electric Rocket:</div>
                     <div class="control-item">E - Enter/Exit Rocket</div>
-                    <div class="control-item">Arrow Keys / WASD - Move (Left/Right/Center)</div>
-                    <div class="control-item">Q - Decrease Speed</div>
-                    <div class="control-item">= / + - Increase Speed</div>
-                    <div class="control-item">Shift - Boost</div>
-                    <div class="control-item">R - Travel to Next Universe</div>
+                    <div class="control-item">Arrow Keys / WASD - Move</div>
+                    <div class="control-item">Q - Decrease Speed | =/+ - Increase Speed</div>
+                    <div class="control-item">Shift - Boost | R - Travel Universe</div>
+                </div>
+                <div class="control-section">
+                    <div class="control-title">Special Actions:</div>
+                    <div class="control-item">T - Interstellar/Time Travel</div>
                 </div>
             </div>
         </div>
+        
+        <div id="encounter-panel">
+            <h2 id="encounter-title" style="color: #ffd700; margin-bottom: 15px;">ENCOUNTER</h2>
+            <p id="encounter-text" style="margin-bottom: 15px;"></p>
+            <button id="encounter-close" style="padding: 10px 20px; background: #00ffff; color: #000; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Continue Journey</button>
+        </div>
+        
         <div id="instructions" style="display: none;"></div>
         <div class="loading" id="loading">Loading Universe...</div>
     </div>
@@ -113,7 +191,9 @@
     <script src="js/player.js"></script>
     <script src="js/vehicle.js"></script>
     <script src="js/worlds.js"></script>
+    <script src="js/encounters.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>
+
 

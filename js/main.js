@@ -21,6 +21,9 @@ class GameScene extends Phaser.Scene {
             // Initialize world generator
             this.worldGenerator = new WorldGenerator(this);
             
+            // Initialize encounter system
+            this.encounterSystem = new EncounterSystem(this);
+            
             // Get current planet data
             const universe = UNIVERSES[currentUniverseIndex];
             const planet = universe.planets[currentPlanetIndex];
@@ -33,6 +36,9 @@ class GameScene extends Phaser.Scene {
             
             // Create vehicle
             this.vehicle = new Vehicle(this, CONFIG.width - 150, CONFIG.height - 200);
+            
+            // Create special action zones
+            this.createSpecialZones();
             
             // Create collisions and store references
             this.playerCollider = this.physics.add.collider(this.player, this.worldGenerator.getPlatforms());
@@ -49,6 +55,7 @@ class GameScene extends Phaser.Scene {
             this.plusKey = this.input.keyboard.addKey('PLUS');
             this.minusKey = this.input.keyboard.addKey('MINUS');
             this.equalsKey = this.input.keyboard.addKey('EQUALS');
+            this.tKey = this.input.keyboard.addKey('T');
             
             // Combine keys
             this.controls = {
@@ -130,6 +137,128 @@ class GameScene extends Phaser.Scene {
         if (Phaser.Input.Keyboard.JustDown(this.rKey) && this.vehicle.isActive) {
             this.travelToNextUniverse();
         }
+        
+        // Check for special actions (T key)
+        if (Phaser.Input.Keyboard.JustDown(this.tKey)) {
+            this.handleSpecialAction();
+        }
+        
+        // Update UI based on current universe
+        this.updateSpecialActionsUI();
+    }
+    
+    createSpecialZones() {
+        const universe = UNIVERSES[currentUniverseIndex];
+        
+        // Black hole center zone
+        if (universe.type === 'blackhole') {
+            this.blackHoleZone = this.add.zone(CONFIG.width / 2, CONFIG.height / 2, 200, 200);
+            this.physics.add.existing(this.blackHoleZone, true);
+        }
+        
+        // Parallel universe time portal
+        if (universe.type === 'parallel') {
+            this.timePortalZone = this.add.zone(CONFIG.width / 2, CONFIG.height / 2, 300, 300);
+            this.physics.add.existing(this.timePortalZone, true);
+        }
+    }
+    
+    handleSpecialAction() {
+        const universe = UNIVERSES[currentUniverseIndex];
+        const target = this.vehicle.isActive ? this.vehicle : this.player;
+        
+        if (universe.type === 'blackhole') {
+            // Check if near black hole center
+            const distance = Phaser.Math.Distance.Between(
+                target.x, target.y,
+                CONFIG.width / 2, CONFIG.height / 2
+            );
+            
+            if (distance < 150) {
+                // Interstellar travel through black hole
+                this.encounterSystem.createEncounter('blackhole', 'blackhole');
+            }
+        } else if (universe.type === 'parallel') {
+            // Check if near time portal
+            const distance = Phaser.Math.Distance.Between(
+                target.x, target.y,
+                CONFIG.width / 2, CONFIG.height / 2
+            );
+            
+            if (distance < 200) {
+                // Time travel in parallel universe
+                this.encounterSystem.createEncounter('parallel', 'parallel');
+            }
+        }
+    }
+    
+    updateSpecialActionsUI() {
+        const universe = UNIVERSES[currentUniverseIndex];
+        const specialActions = document.getElementById('special-actions');
+        const blackholeAction = document.getElementById('blackhole-action');
+        const parallelAction = document.getElementById('parallel-action');
+        const statusEl = document.getElementById('encounter-status');
+        const statusText = document.getElementById('status-text');
+        
+        if (specialActions) {
+            if (universe.type === 'blackhole') {
+                specialActions.style.display = 'block';
+                if (blackholeAction) blackholeAction.style.display = 'block';
+                if (parallelAction) parallelAction.style.display = 'none';
+                if (statusText) statusText.textContent = 'Near Black Hole';
+            } else if (universe.type === 'parallel') {
+                specialActions.style.display = 'block';
+                if (blackholeAction) blackholeAction.style.display = 'none';
+                if (parallelAction) parallelAction.style.display = 'block';
+                if (statusText) statusText.textContent = 'In Parallel Universe';
+            } else {
+                specialActions.style.display = 'none';
+                if (statusText) statusText.textContent = 'Exploring';
+            }
+        }
+        
+        if (statusEl) {
+            statusEl.style.display = 'block';
+        }
+    }
+    
+    createTimeTravelEffect() {
+        // Create time travel visual effect
+        const timeParticles = this.add.particles(CONFIG.width / 2, CONFIG.height / 2, 'particle', {
+            speed: { min: 100, max: 300 },
+            scale: { start: 1, end: 0 },
+            tint: [0xff00ff, 0x00ffff, 0xffffff],
+            lifespan: 2000,
+            frequency: 50,
+            emitZone: { type: 'edge', source: new Phaser.Geom.Circle(0, 0, 100), quantity: 100 }
+        });
+        
+        // Time distortion text
+        const timeText = this.add.text(
+            CONFIG.width / 2,
+            CONFIG.height / 2,
+            'TIME IS FLOWING...',
+            {
+                fontSize: '48px',
+                fill: '#ff00ff',
+                stroke: '#000000',
+                strokeThickness: 4
+            }
+        );
+        timeText.setOrigin(0.5);
+        timeText.setDepth(2000);
+        
+        // Animate
+        this.tweens.add({
+            targets: timeText,
+            scale: { from: 0.5, to: 1.5 },
+            alpha: 0,
+            duration: 3000,
+            onComplete: () => {
+                timeText.destroy();
+                timeParticles.destroy();
+            }
+        });
     }
     
     handleVehicleInteraction(player, vehicle) {
