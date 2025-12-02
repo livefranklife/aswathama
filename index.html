@@ -35,23 +35,37 @@
             top: 10px;
             left: 10px;
             color: #00ffff;
-            font-size: 18px;
+            font-size: 16px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
             z-index: 1000;
             pointer-events: none;
+            line-height: 1.6;
+        }
+        
+        #controls-panel {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(0, 255, 255, 0.3);
+            font-size: 14px;
+        }
+        
+        #controls-panel .control-section {
+            margin-bottom: 8px;
+        }
+        
+        #controls-panel .control-title {
+            color: #ffff00;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        #controls-panel .control-item {
+            margin-left: 10px;
+            color: #00ffff;
         }
         
         #instructions {
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: #ffff00;
-            font-size: 14px;
-            text-align: center;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            pointer-events: none;
+            display: none;
         }
         
         .loading {
@@ -72,10 +86,25 @@
             <div>Planet: <span id="planet-name">-</span></div>
             <div>Distance Traveled: <span id="distance">0</span> light years</div>
             <div id="speed-indicator" style="display: none;">Speed: 1/5</div>
+            
+            <div id="controls-panel">
+                <div class="control-section">
+                    <div class="control-title">Movement:</div>
+                    <div class="control-item">Arrow Keys / WASD - Move</div>
+                    <div class="control-item">Space / W - Jump (on foot)</div>
+                </div>
+                <div class="control-section">
+                    <div class="control-title">Electric Rocket:</div>
+                    <div class="control-item">E - Enter/Exit Rocket</div>
+                    <div class="control-item">Arrow Keys / WASD - Move (Left/Right/Center)</div>
+                    <div class="control-item">Q - Decrease Speed</div>
+                    <div class="control-item">= / + - Increase Speed</div>
+                    <div class="control-item">Shift - Boost</div>
+                    <div class="control-item">R - Travel to Next Universe</div>
+                </div>
+            </div>
         </div>
-        <div id="instructions">
-            <div><strong>Electric Rocket Controls:</strong> Arrow Keys / WASD: Move (Left/Right/Center) | E: Enter/Exit | R: Travel Universe | Q: Slower | =/+: Faster | Shift: Boost</div>
-        </div>
+        <div id="instructions" style="display: none;"></div>
         <div class="loading" id="loading">Loading Universe...</div>
     </div>
     
