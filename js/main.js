@@ -84,9 +84,12 @@ class GameScene extends Phaser.Scene {
             // Update UI
             this.updateUI();
             
-            // Create camera effects
+            // Create camera effects - follow vehicle/player across entire world
             this.cameras.main.setBounds(0, 0, CONFIG.width, CONFIG.height);
             this.cameras.main.startFollow(this.vehicle.isActive ? this.vehicle : this.player);
+            // Smooth camera following for better travel experience
+            this.cameras.main.setDeadzone(100, 100);
+            this.cameras.main.setLerp(0.1, 0.1);
             
             // Add visual effects
             this.createVisualEffects();
@@ -122,15 +125,16 @@ class GameScene extends Phaser.Scene {
         }
         
         if (this.vehicle.isActive && this.vehicle.playerInside) {
-            // Player is in vehicle
+            // Player is in vehicle - free travel mode
             this.vehicle.update(this.controls);
             // Update player position inside vehicle
             this.player.update(this.controls);
-            this.cameras.main.startFollow(this.vehicle);
+            // Camera follows vehicle for smooth travel
+            this.cameras.main.startFollow(this.vehicle, false, 0.1, 0.1);
         } else {
             // Player is on foot
             this.player.update(this.controls);
-            this.cameras.main.startFollow(this.player);
+            this.cameras.main.startFollow(this.player, false, 0.1, 0.1);
         }
         
         // Check for universe travel

@@ -320,25 +320,30 @@ class WorldGenerator {
     createPlatforms(planetData) {
         this.platforms = this.scene.physics.add.staticGroup();
         
-        const platformCount = planetData.size === 'large' ? 8 : planetData.size === 'medium' ? 6 : 4;
+        // More platforms spread across the larger world for exploration
+        const platformCount = planetData.size === 'large' ? 15 : planetData.size === 'medium' ? 12 : 8;
         const platformWidth = planetData.size === 'large' ? 200 : planetData.size === 'medium' ? 150 : 100;
         
-        // Ground platform
-        const ground = this.scene.add.rectangle(
-            CONFIG.width / 2,
-            CONFIG.height - 50,
-            CONFIG.width,
-            100,
-            planetData.color,
-            0.8
-        );
-        this.scene.physics.add.existing(ground, true);
-        this.platforms.add(ground);
+        // Multiple ground platforms across the world (for landing zones)
+        const groundPlatforms = 3;
+        for (let g = 0; g < groundPlatforms; g++) {
+            const groundX = (CONFIG.width / (groundPlatforms + 1)) * (g + 1);
+            const ground = this.scene.add.rectangle(
+                groundX,
+                CONFIG.height - 50,
+                CONFIG.width / (groundPlatforms + 1),
+                100,
+                planetData.color,
+                0.8
+            );
+            this.scene.physics.add.existing(ground, true);
+            this.platforms.add(ground);
+        }
         
-        // Floating platforms
+        // Floating platforms spread across entire world for exploration
         for (let i = 0; i < platformCount; i++) {
-            const x = Phaser.Math.Between(100, CONFIG.width - 100);
-            const y = Phaser.Math.Between(200, CONFIG.height - 200);
+            const x = Phaser.Math.Between(200, CONFIG.width - 200);
+            const y = Phaser.Math.Between(150, CONFIG.height - 300);
             
             const platform = this.scene.add.rectangle(
                 x, y,
@@ -366,6 +371,33 @@ class WorldGenerator {
                 targets: [platform, glow],
                 y: y + Phaser.Math.Between(-30, 30),
                 duration: Phaser.Math.Between(2000, 4000),
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
+            });
+        }
+        
+        // Create special landing zones/points of interest
+        this.createLandingZones(planetData);
+    }
+    
+    createLandingZones(planetData) {
+        // Create interesting locations to travel to
+        const zoneCount = 4;
+        for (let i = 0; i < zoneCount; i++) {
+            const x = Phaser.Math.Between(300, CONFIG.width - 300);
+            const y = Phaser.Math.Between(200, CONFIG.height - 400);
+            
+            // Landing zone marker
+            const marker = this.scene.add.circle(x, y, 30, planetData.color, 0.5);
+            marker.setDepth(-5);
+            
+            // Pulsing effect to attract attention
+            this.scene.tweens.add({
+                targets: marker,
+                scale: { from: 0.8, to: 1.2 },
+                alpha: { from: 0.3, to: 0.7 },
+                duration: 2000,
                 yoyo: true,
                 repeat: -1,
                 ease: 'Sine.easeInOut'

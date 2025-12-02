@@ -201,13 +201,13 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
         const gameWidth = this.scene.scale ? this.scene.scale.width : CONFIG.width;
         const centerX = gameWidth / 2;
         
-        // Movement controls - Jet-like flying with banking
+        // Movement controls - Free travel from place to place (no auto-centering)
         const leftPressed = cursors.left && cursors.left.isDown;
         const rightPressed = cursors.right && cursors.right.isDown;
         const aPressed = cursors.a && cursors.a.isDown;
         const dPressed = cursors.d && cursors.d.isDown;
         
-        // Banking/tilting when turning (like a real jet)
+        // Free horizontal movement - travel anywhere
         if (leftPressed || aPressed) {
             velocityX = -currentSpeed;
             this.targetRotation = -0.3; // Bank left
@@ -215,30 +215,24 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
             velocityX = currentSpeed;
             this.targetRotation = 0.3; // Bank right
         } else {
-            // Center positioning - smoothly return to center
-            const distanceToCenter = centerX - this.x;
-            const threshold = 5;
-            if (Math.abs(distanceToCenter) > threshold) {
-                const centeringSpeed = Math.min(currentSpeed * 0.7, Math.abs(distanceToCenter) * 0.2);
-                velocityX = Math.sign(distanceToCenter) * centeringSpeed;
-                this.targetRotation = Math.sign(distanceToCenter) * 0.15;
-            } else {
-                this.setX(centerX);
-                velocityX = 0;
-                this.targetRotation = 0; // Level flight
-            }
+            // No input - stop horizontal movement, level out
+            velocityX = 0;
+            this.targetRotation = 0; // Level flight
         }
         
-        // Vertical movement (smooth like a jet)
+        // Vertical movement - free travel up and down
         const upPressed = cursors.up && cursors.up.isDown;
         const downPressed = cursors.down && cursors.down.isDown;
         const wPressed = cursors.w && cursors.w.isDown;
         const sPressed = cursors.s && cursors.s.isDown;
         
         if (upPressed || wPressed) {
-            velocityY = -currentSpeed * 0.8; // Slightly slower vertical
+            velocityY = -currentSpeed; // Full speed vertical
         } else if (downPressed || sPressed) {
-            velocityY = currentSpeed * 0.8;
+            velocityY = currentSpeed; // Full speed vertical
+        } else {
+            // No vertical input - stop vertical movement
+            velocityY = 0;
         }
         
         // Smooth rotation (banking effect)
