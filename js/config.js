@@ -11,8 +11,8 @@ const CONFIG = {
         }
     },
     scale: {
-        mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH
+        mode: 1, // Phaser.Scale.FIT
+        autoCenter: 1 // Phaser.Scale.CENTER_BOTH
     }
 };
 

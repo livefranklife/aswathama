@@ -207,17 +207,23 @@ class WorldGenerator {
     
     createEnergyFieldEffect() {
         // Create energy particles
-        const particles = this.scene.add.particles(0, 0, 'particle', {
-            x: { min: 0, max: CONFIG.width },
-            y: { min: 0, max: CONFIG.height },
-            speed: { min: 20, max: 50 },
-            scale: { start: 0.5, end: 0 },
-            tint: 0x00ff00,
-            lifespan: 2000,
-            frequency: 100
-        });
-        
-        particles.setDepth(-25);
+        try {
+            const particles = this.scene.add.particles(0, 0, 'particle', {
+                x: { min: 0, max: CONFIG.width },
+                y: { min: 0, max: CONFIG.height },
+                speed: { min: 20, max: 50 },
+                scale: { start: 0.5, end: 0 },
+                tint: 0x00ff00,
+                lifespan: 2000,
+                frequency: 100
+            });
+            
+            if (particles) {
+                particles.setDepth(-25);
+            }
+        } catch (error) {
+            console.warn('Could not create energy field effect:', error);
+        }
     }
     
     getPlatforms() {

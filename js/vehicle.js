@@ -80,17 +80,24 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
     
     createParticles() {
         // Create particle emitter for engine trail
-        this.trail = this.scene.add.particles(this.x, this.y, 'particle', {
-            speed: { min: 50, max: 100 },
-            scale: { start: 0.3, end: 0 },
-            tint: [0xffff00, 0xff6b35],
-            lifespan: 300,
-            frequency: 50,
-            follow: this,
-            followOffset: { x: 0, y: 25 }
-        });
-        
-        this.trail.stop();
+        try {
+            this.trail = this.scene.add.particles(this.x, this.y, 'particle', {
+                speed: { min: 50, max: 100 },
+                scale: { start: 0.3, end: 0 },
+                tint: [0xffff00, 0xff6b35],
+                lifespan: 300,
+                frequency: 50,
+                follow: this,
+                followOffset: { x: 0, y: 25 }
+            });
+            
+            if (this.trail) {
+                this.trail.stop();
+            }
+        } catch (error) {
+            console.warn('Could not create particle trail:', error);
+            this.trail = null;
+        }
     }
     
     update(cursors) {
@@ -120,10 +127,14 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
         // Update particle trail
         if (velocityX !== 0 || velocityY !== 0) {
             this.play('vehicle-fly', true);
-            this.trail.start();
+            if (this.trail) {
+                this.trail.start();
+            }
         } else {
             this.play('vehicle-idle', true);
-            this.trail.stop();
+            if (this.trail) {
+                this.trail.stop();
+            }
         }
     }
     
@@ -139,7 +150,9 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
         this.isActive = false;
         this.playerInside = false;
         this.setTint(0xffffff);
-        this.trail.stop();
+        if (this.trail) {
+            this.trail.stop();
+        }
         this.setVelocity(0, 0);
         // Re-enable gravity when vehicle is inactive
         this.body.setAllowGravity(true);
@@ -147,18 +160,26 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
     
     travelToNextUniverse() {
         // Create warp effect
-        const warpEffect = this.scene.add.particles(this.x, this.y, 'particle', {
-            speed: { min: 200, max: 400 },
-            scale: { start: 1, end: 0 },
-            tint: [0x00ffff, 0xff00ff, 0xffffff],
-            lifespan: 1000,
-            frequency: 10,
-            emitZone: { type: 'edge', source: new Phaser.Geom.Circle(0, 0, 50), quantity: 50 }
-        });
-        
-        this.scene.time.delayedCall(1000, () => {
-            warpEffect.destroy();
-        });
+        try {
+            const warpEffect = this.scene.add.particles(this.x, this.y, 'particle', {
+                speed: { min: 200, max: 400 },
+                scale: { start: 1, end: 0 },
+                tint: [0x00ffff, 0xff00ff, 0xffffff],
+                lifespan: 1000,
+                frequency: 10,
+                emitZone: { type: 'edge', source: new Phaser.Geom.Circle(0, 0, 50), quantity: 50 }
+            });
+            
+            if (warpEffect) {
+                this.scene.time.delayedCall(1000, () => {
+                    if (warpEffect && warpEffect.destroy) {
+                        warpEffect.destroy();
+                    }
+                });
+            }
+        } catch (error) {
+            console.warn('Could not create warp effect:', error);
+        }
         
         return true;
     }

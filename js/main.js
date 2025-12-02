@@ -170,16 +170,23 @@ class GameScene extends Phaser.Scene {
     
     createVisualEffects() {
         // Add ambient particles
-        this.ambientParticles = this.add.particles(0, 0, 'particle', {
-            x: { min: 0, max: CONFIG.width },
-            y: { min: 0, max: CONFIG.height },
-            speed: { min: 10, max: 30 },
-            scale: { start: 0.2, end: 0 },
-            tint: [0x00ffff, 0xff00ff, 0xffff00],
-            lifespan: 3000,
-            frequency: 200
-        });
-        this.ambientParticles.setDepth(-40);
+        try {
+            this.ambientParticles = this.add.particles(0, 0, 'particle', {
+                x: { min: 0, max: CONFIG.width },
+                y: { min: 0, max: CONFIG.height },
+                speed: { min: 10, max: 30 },
+                scale: { start: 0.2, end: 0 },
+                tint: [0x00ffff, 0xff00ff, 0xffff00],
+                lifespan: 3000,
+                frequency: 200
+            });
+            if (this.ambientParticles) {
+                this.ambientParticles.setDepth(-40);
+            }
+        } catch (error) {
+            console.warn('Could not create ambient particles:', error);
+            this.ambientParticles = null;
+        }
     }
     
     gameComplete() {
@@ -214,15 +221,51 @@ class GameScene extends Phaser.Scene {
     }
 }
 
-// Initialize Game
-const game = new Phaser.Game({
-    type: Phaser.AUTO,
-    width: CONFIG.width,
-    height: CONFIG.height,
-    parent: 'game-container',
-    backgroundColor: CONFIG.backgroundColor,
-    physics: CONFIG.physics,
-    scale: CONFIG.scale,
-    scene: GameScene
-});
+// Initialize Game - Wait for DOM and Phaser to be fully loaded
+function initGame() {
+    if (typeof Phaser === 'undefined') {
+        console.error('Phaser library not loaded!');
+        document.getElementById('loading').textContent = 'Error: Phaser library not loaded. Please check your internet connection.';
+        document.getElementById('loading').style.color = '#ff0000';
+        return;
+    }
+    
+    if (!document.getElementById('game-container')) {
+        console.error('Game container not found!');
+        return;
+    }
+    
+    try {
+        const game = new Phaser.Game({
+            type: Phaser.AUTO,
+            width: CONFIG.width,
+            height: CONFIG.height,
+            parent: 'game-container',
+            backgroundColor: CONFIG.backgroundColor,
+            physics: CONFIG.physics,
+            scale: {
+                mode: Phaser.Scale.FIT,
+                autoCenter: Phaser.Scale.CENTER_BOTH
+            },
+            scene: GameScene
+        });
+        console.log('Game initialized successfully!');
+    } catch (error) {
+        console.error('Error initializing game:', error);
+        const loadingEl = document.getElementById('loading');
+        if (loadingEl) {
+            loadingEl.textContent = 'Error loading game. Please check console for details.';
+            loadingEl.style.color = '#ff0000';
+        }
+    }
+}
+
+// Wait for both DOM and window load
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('load', initGame);
+    });
+} else {
+    window.addEventListener('load', initGame);
+}
 
