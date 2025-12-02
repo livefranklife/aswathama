@@ -44,26 +44,47 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             // Create a simple player sprite using graphics
             const graphics = this.scene.add.graphics();
             
-            // Body (blue astronaut-like figure)
-            graphics.fillStyle(0x00aaff);
-            graphics.fillRect(0, 0, 40, 60);
-            
-            // Helmet
+            // Enhanced Spaceman Design
+            // Body (space suit - white/orange)
             graphics.fillStyle(0xffffff);
-            graphics.fillCircle(20, 15, 18);
+            graphics.fillRect(12, 20, 36, 50);
             
-            // Visor
-            graphics.fillStyle(0x00ffff);
-            graphics.fillRect(8, 10, 24, 12);
+            // Helmet (large, reflective)
+            graphics.fillStyle(0xffffff);
+            graphics.fillCircle(30, 15, 20);
             
-            // Arms
-            graphics.fillStyle(0x00aaff);
-            graphics.fillRect(-8, 20, 12, 30);
-            graphics.fillRect(36, 20, 12, 30);
+            // Helmet visor (golden reflective)
+            graphics.fillStyle(0xffd700);
+            graphics.fillRect(15, 8, 30, 18);
+            graphics.fillStyle(0x00aaff, 0.6);
+            graphics.fillRect(18, 11, 24, 12);
             
-            // Legs
-            graphics.fillRect(8, 50, 12, 20);
-            graphics.fillRect(20, 50, 12, 20);
+            // Space suit details
+            graphics.fillStyle(0xff6600);
+            graphics.fillRect(15, 25, 30, 8); // Chest panel
+            graphics.fillRect(15, 35, 30, 6); // Belt
+            
+            // Arms (with joints)
+            graphics.fillStyle(0xffffff);
+            graphics.fillRect(-5, 25, 12, 35);
+            graphics.fillRect(48, 25, 12, 35);
+            graphics.fillStyle(0xff6600);
+            graphics.fillRect(-3, 30, 8, 8); // Shoulder joint
+            graphics.fillRect(50, 30, 8, 8);
+            
+            // Legs (space boots)
+            graphics.fillStyle(0xffffff);
+            graphics.fillRect(12, 60, 14, 25);
+            graphics.fillRect(34, 60, 14, 25);
+            graphics.fillStyle(0x333333);
+            graphics.fillRect(12, 80, 14, 5); // Boots
+            graphics.fillRect(34, 80, 14, 5);
+            
+            // Backpack (life support)
+            graphics.fillStyle(0x444444);
+            graphics.fillRect(8, 25, 8, 30);
+            graphics.fillStyle(0x00ff00);
+            graphics.fillRect(10, 30, 4, 4); // Indicator light
             
             graphics.generateTexture('player', 60, 80);
             graphics.destroy();
