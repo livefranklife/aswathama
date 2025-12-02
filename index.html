@@ -12,10 +12,10 @@
         }
         
         body {
-            margin: 0;
-            padding: 0;
-            width: 100vw;
-            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
             background: #000;
             font-family: 'Arial', sans-serif;
             overflow: hidden;
@@ -23,17 +23,14 @@
         
         #game-container {
             position: relative;
-            width: 100vw;
-            height: 100vh;
+            width: 95vw;
+            height: 95vh;
+            max-width: 1920px;
+            max-height: 1080px;
             border: 3px solid #00ffff;
             border-radius: 10px;
             box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
             overflow: hidden;
-        }
-        
-        body {
-            padding: 0;
-            margin: 0;
         }
         
         /* Galaxy Background */
@@ -294,14 +291,15 @@
             galaxyBg.appendChild(star);
         }
         
-        // Rocket control with infinite loop world
+        // Rocket control with infinite loop
         const rocket = document.getElementById('rocket');
         const gameContainer = document.getElementById('game-container');
         
         function getContainerSize() {
+            const rect = gameContainer.getBoundingClientRect();
             return {
-                width: window.innerWidth,
-                height: window.innerHeight
+                width: rect.width,
+                height: rect.height
             };
         }
         
@@ -309,16 +307,16 @@
         let rocketX = size.width / 2; // pixels from left
         let rocketY = size.height / 2; // pixels from top
         let rotation = 0;
-        const speed = 8; // pixels per frame - faster for larger area
+        const speed = 7; // pixels per frame - faster for larger area
         let keys = {};
         
-        // Update rocket position with infinite loop
+        // Update rocket position with infinite loop wraparound
         function updateRocket() {
             let moved = false;
             let newRotation = rotation;
-            size = getContainerSize(); // Update size on each frame
+            size = getContainerSize(); // Update size dynamically
             
-            // Handle movement with wraparound (infinite loop)
+            // Handle movement with infinite loop wraparound
             if (keys['ArrowUp'] || keys['w'] || keys['W']) {
                 rocketY -= speed;
                 newRotation = -15;
@@ -379,7 +377,7 @@
             
             // Update distance when moving
             if (moved) {
-                distance += 0.15;
+                distance += 0.12;
                 updateUI();
             }
         }
