@@ -292,10 +292,11 @@
         // Rocket control
         const rocket = document.getElementById('rocket');
         const gameContainer = document.getElementById('game-container');
-        let rocketX = 50; // percentage
-        let rocketY = 50; // percentage
+        const containerRect = gameContainer.getBoundingClientRect();
+        let rocketX = containerRect.width / 2; // pixels from left
+        let rocketY = containerRect.height / 2; // pixels from top
         let rotation = 0;
-        const speed = 1; // percentage per frame
+        const speed = 5; // pixels per frame
         let keys = {};
         
         // Update rocket position
@@ -303,24 +304,24 @@
             let moved = false;
             let newRotation = rotation;
             
-            // Handle movement
+            // Handle movement - allow full screen movement
             if (keys['ArrowUp'] || keys['w'] || keys['W']) {
-                rocketY = Math.max(5, rocketY - speed);
+                rocketY = Math.max(40, rocketY - speed); // 40px from top to keep rocket visible
                 newRotation = -15;
                 moved = true;
             }
             if (keys['ArrowDown'] || keys['s'] || keys['S']) {
-                rocketY = Math.min(95, rocketY + speed);
+                rocketY = Math.min(containerRect.height - 40, rocketY + speed); // 40px from bottom
                 newRotation = 15;
                 moved = true;
             }
             if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
-                rocketX = Math.max(5, rocketX - speed);
+                rocketX = Math.max(30, rocketX - speed); // 30px from left
                 newRotation = -30;
                 moved = true;
             }
             if (keys['ArrowRight'] || keys['d'] || keys['D']) {
-                rocketX = Math.min(95, rocketX + speed);
+                rocketX = Math.min(containerRect.width - 30, rocketX + speed); // 30px from right
                 newRotation = 30;
                 moved = true;
             }
@@ -341,9 +342,9 @@
                 rocket.classList.remove('rocket-moving');
             }
             
-            // Apply position and rotation
-            rocket.style.left = rocketX + '%';
-            rocket.style.top = rocketY + '%';
+            // Apply position and rotation using pixels
+            rocket.style.left = rocketX + 'px';
+            rocket.style.top = rocketY + 'px';
             rocket.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
             
             // Update distance when moving
@@ -352,6 +353,11 @@
                 updateUI();
             }
         }
+        
+        // Update container rect on window resize
+        window.addEventListener('resize', () => {
+            containerRect = gameContainer.getBoundingClientRect();
+        });
         
         // Keyboard event listeners
         document.addEventListener('keydown', (e) => {
