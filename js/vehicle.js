@@ -167,26 +167,46 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
         let velocityX = 0;
         let velocityY = 0;
         
+        // Get game width for center calculation
+        const gameWidth = this.scene.scale.width;
+        const centerX = gameWidth / 2;
+        
         // Movement controls - Left, Right, Center positioning
-        if (cursors.left.isDown || cursors.a.isDown) {
+        const leftPressed = cursors.left && cursors.left.isDown;
+        const rightPressed = cursors.right && cursors.right.isDown;
+        const aPressed = cursors.a && cursors.a.isDown;
+        const dPressed = cursors.d && cursors.d.isDown;
+        
+        if (leftPressed || aPressed) {
+            // Move left
             velocityX = -currentSpeed;
-        } else if (cursors.right.isDown || cursors.d.isDown) {
+        } else if (rightPressed || dPressed) {
+            // Move right
             velocityX = currentSpeed;
-        }
-        // Center positioning - if no horizontal input, center horizontally
-        else {
-            // Smoothly center if not at center
-            const centerX = CONFIG.width / 2;
+        } else {
+            // Center positioning - automatically center when no horizontal input
             const distanceToCenter = centerX - this.x;
-            if (Math.abs(distanceToCenter) > 10) {
-                velocityX = Math.sign(distanceToCenter) * Math.min(currentSpeed * 0.5, Math.abs(distanceToCenter) * 0.1);
+            const threshold = 5; // Stop when within 5 pixels of center
+            if (Math.abs(distanceToCenter) > threshold) {
+                // Smooth centering with acceleration
+                const centeringSpeed = Math.min(currentSpeed * 0.6, Math.abs(distanceToCenter) * 0.15);
+                velocityX = Math.sign(distanceToCenter) * centeringSpeed;
+            } else {
+                // Snap to center if very close
+                this.setX(centerX);
+                velocityX = 0;
             }
         }
         
         // Vertical movement
-        if (cursors.up.isDown || cursors.w.isDown) {
+        const upPressed = cursors.up && cursors.up.isDown;
+        const downPressed = cursors.down && cursors.down.isDown;
+        const wPressed = cursors.w && cursors.w.isDown;
+        const sPressed = cursors.s && cursors.s.isDown;
+        
+        if (upPressed || wPressed) {
             velocityY = -currentSpeed;
-        } else if (cursors.down.isDown || cursors.s.isDown) {
+        } else if (downPressed || sPressed) {
             velocityY = currentSpeed;
         }
         
@@ -229,6 +249,22 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
             this.currentSpeedLevel++;
             this.speed = this.minSpeed + ((this.maxSpeed - this.minSpeed) / 4) * (this.currentSpeedLevel - 1);
             this.boostSpeed = this.speed * 1.5;
+            
+            // Update UI
+            const speedEl = document.getElementById('speed-indicator');
+            if (speedEl) {
+                speedEl.textContent = `Speed: ${this.currentSpeedLevel}/5 (${Math.round(this.speed)} px/s)`;
+            }
+            
+            // Visual feedback
+            this.scene.tweens.add({
+                targets: this,
+                scaleX: 1.3,
+                scaleY: 1.3,
+                duration: 100,
+                yoyo: true,
+                ease: 'Power2'
+            });
         }
     }
     
@@ -237,6 +273,22 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
             this.currentSpeedLevel--;
             this.speed = this.minSpeed + ((this.maxSpeed - this.minSpeed) / 4) * (this.currentSpeedLevel - 1);
             this.boostSpeed = this.speed * 1.5;
+            
+            // Update UI
+            const speedEl = document.getElementById('speed-indicator');
+            if (speedEl) {
+                speedEl.textContent = `Speed: ${this.currentSpeedLevel}/5 (${Math.round(this.speed)} px/s)`;
+            }
+            
+            // Visual feedback
+            this.scene.tweens.add({
+                targets: this,
+                scaleX: 1.1,
+                scaleY: 1.1,
+                duration: 100,
+                yoyo: true,
+                ease: 'Power2'
+            });
         }
     }
     
@@ -258,6 +310,11 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
         // Disable gravity when vehicle is active (can fly)
         this.body.setAllowGravity(false);
         
+        // Reset speed to level 1 when entering
+        this.currentSpeedLevel = 1;
+        this.speed = this.minSpeed;
+        this.boostSpeed = this.speed * 1.5;
+        
         // Update speed indicator visual
         this.updateSpeedIndicator();
         
@@ -267,6 +324,15 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
             speedEl.style.display = 'block';
             speedEl.textContent = `Speed: ${this.currentSpeedLevel}/5 (${Math.round(this.speed)} px/s)`;
         }
+        
+        // Electric activation effect
+        this.scene.tweens.add({
+            targets: this,
+            alpha: 0.7,
+            duration: 200,
+            yoyo: true,
+            ease: 'Power2'
+        });
     }
     
     deactivate() {
@@ -294,21 +360,46 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
     }
     
     travelToNextUniverse() {
-        // Create warp effect
+        // Create enhanced warp effect for universe travel
         try {
+            // Main warp particles
             const warpEffect = this.scene.add.particles(this.x, this.y, 'particle', {
                 speed: { min: 200, max: 400 },
                 scale: { start: 1, end: 0 },
-                tint: [0x00ffff, 0xff00ff, 0xffffff],
+                tint: [0x00ffff, 0xff00ff, 0xffffff, 0x00ff00],
                 lifespan: 1000,
-                frequency: 10,
-                emitZone: { type: 'edge', source: new Phaser.Geom.Circle(0, 0, 50), quantity: 50 }
+                frequency: 20,
+                emitZone: { type: 'edge', source: new Phaser.Geom.Circle(0, 0, 60), quantity: 100 }
+            });
+            
+            // Electric energy burst
+            const energyBurst = this.scene.add.particles(this.x, this.y, 'particle', {
+                speed: { min: 300, max: 500 },
+                scale: { start: 1.5, end: 0 },
+                tint: [0x00ffff, 0x00ff00],
+                lifespan: 800,
+                frequency: 30,
+                emitZone: { type: 'edge', source: new Phaser.Geom.Circle(0, 0, 40), quantity: 50 }
+            });
+            
+            // Rocket glow effect
+            this.scene.tweens.add({
+                targets: this,
+                scaleX: 1.5,
+                scaleY: 1.5,
+                alpha: 0.5,
+                duration: 500,
+                yoyo: true,
+                ease: 'Power2'
             });
             
             if (warpEffect) {
                 this.scene.time.delayedCall(1000, () => {
                     if (warpEffect && warpEffect.destroy) {
                         warpEffect.destroy();
+                    }
+                    if (energyBurst && energyBurst.destroy) {
+                        energyBurst.destroy();
                     }
                 });
             }
