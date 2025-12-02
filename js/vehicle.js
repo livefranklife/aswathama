@@ -10,11 +10,16 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
         this.setCollideWorldBounds(true);
         this.setScale(1.2);
         
-        // Movement properties
-        this.speed = 300;
-        this.boostSpeed = 500;
+        // Movement properties - Electric Rocket
+        this.baseSpeed = 200;
+        this.speed = 200;
+        this.minSpeed = 100;
+        this.maxSpeed = 800;
+        this.speedMultiplier = 1.0;
+        this.boostSpeed = 600;
         this.isActive = false;
         this.playerInside = false;
+        this.currentSpeedLevel = 1; // 1-5 speed levels
         
         // Create vehicle graphics
         this.createVehicleGraphics();
@@ -32,25 +37,43 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
     createVehicleGraphics() {
         const graphics = this.scene.add.graphics();
         
-        // Main body (futuristic spaceship)
-        graphics.fillStyle(0xff6b35);
-        graphics.fillRect(0, 0, 80, 50);
+        // Electric Rocket Design
+        // Main rocket body (sleek, electric blue)
+        graphics.fillStyle(0x00aaff);
+        graphics.fillRect(10, 0, 60, 80);
         
-        // Cockpit
+        // Rocket nose cone
         graphics.fillStyle(0x00ffff);
-        graphics.fillRect(20, 5, 40, 25);
+        graphics.fillTriangle(40, 0, 20, 20, 60, 20);
         
-        // Wings
-        graphics.fillStyle(0xff4500);
-        graphics.fillRect(-15, 15, 20, 20);
-        graphics.fillRect(75, 15, 20, 20);
+        // Cockpit window (electric glow)
+        graphics.fillStyle(0x00ffff);
+        graphics.fillRect(25, 15, 30, 20);
+        graphics.fillStyle(0xffffff);
+        graphics.fillRect(28, 18, 24, 14);
         
-        // Engine glow
-        graphics.fillStyle(0xffff00);
-        graphics.fillRect(5, 45, 20, 10);
-        graphics.fillRect(55, 45, 20, 10);
+        // Electric panels on sides
+        graphics.fillStyle(0x00ff00);
+        graphics.fillRect(5, 25, 8, 15);
+        graphics.fillRect(67, 25, 8, 15);
+        graphics.fillRect(5, 45, 8, 15);
+        graphics.fillRect(67, 45, 8, 15);
         
-        graphics.generateTexture('vehicle', 100, 70);
+        // Rocket fins
+        graphics.fillStyle(0x0088ff);
+        graphics.fillRect(-5, 50, 15, 20);
+        graphics.fillRect(70, 50, 15, 20);
+        
+        // Main engine (electric blue glow)
+        graphics.fillStyle(0x00ffff);
+        graphics.fillRect(25, 75, 30, 15);
+        
+        // Secondary engines
+        graphics.fillStyle(0x00ff00);
+        graphics.fillRect(10, 80, 12, 10);
+        graphics.fillRect(58, 80, 12, 10);
+        
+        graphics.generateTexture('vehicle', 80, 100);
         graphics.destroy();
     }
     
@@ -79,24 +102,54 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
     }
     
     createParticles() {
-        // Create particle emitter for engine trail
+        // Create electric rocket engine trail
         try {
+            // Main engine trail (electric blue)
             this.trail = this.scene.add.particles(this.x, this.y, 'particle', {
+                speed: { min: 80, max: 150 },
+                scale: { start: 0.5, end: 0 },
+                tint: [0x00ffff, 0x00ff00, 0xffffff],
+                lifespan: 400,
+                frequency: 80,
+                follow: this,
+                followOffset: { x: 0, y: 45 }
+            });
+            
+            // Side engine trails
+            this.sideTrail1 = this.scene.add.particles(this.x, this.y, 'particle', {
                 speed: { min: 50, max: 100 },
                 scale: { start: 0.3, end: 0 },
-                tint: [0xffff00, 0xff6b35],
+                tint: [0x00ff00, 0x00ffff],
                 lifespan: 300,
-                frequency: 50,
+                frequency: 60,
                 follow: this,
-                followOffset: { x: 0, y: 25 }
+                followOffset: { x: -20, y: 50 }
+            });
+            
+            this.sideTrail2 = this.scene.add.particles(this.x, this.y, 'particle', {
+                speed: { min: 50, max: 100 },
+                scale: { start: 0.3, end: 0 },
+                tint: [0x00ff00, 0x00ffff],
+                lifespan: 300,
+                frequency: 60,
+                follow: this,
+                followOffset: { x: 20, y: 50 }
             });
             
             if (this.trail) {
                 this.trail.stop();
             }
+            if (this.sideTrail1) {
+                this.sideTrail1.stop();
+            }
+            if (this.sideTrail2) {
+                this.sideTrail2.stop();
+            }
         } catch (error) {
             console.warn('Could not create particle trail:', error);
             this.trail = null;
+            this.sideTrail1 = null;
+            this.sideTrail2 = null;
         }
     }
     
@@ -105,17 +158,29 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
             return;
         }
         
+        // Boost with Shift
+        let currentSpeed = cursors.shift && cursors.shift.isDown ? this.boostSpeed : this.speed;
+        
         let velocityX = 0;
         let velocityY = 0;
-        let currentSpeed = cursors.shift.isDown ? this.boostSpeed : this.speed;
         
-        // Movement controls
+        // Movement controls - Left, Right, Center positioning
         if (cursors.left.isDown || cursors.a.isDown) {
             velocityX = -currentSpeed;
         } else if (cursors.right.isDown || cursors.d.isDown) {
             velocityX = currentSpeed;
         }
+        // Center positioning - if no horizontal input, center horizontally
+        else {
+            // Smoothly center if not at center
+            const centerX = CONFIG.width / 2;
+            const distanceToCenter = centerX - this.x;
+            if (Math.abs(distanceToCenter) > 10) {
+                velocityX = Math.sign(distanceToCenter) * Math.min(currentSpeed * 0.5, Math.abs(distanceToCenter) * 0.1);
+            }
+        }
         
+        // Vertical movement
         if (cursors.up.isDown || cursors.w.isDown) {
             velocityY = -currentSpeed;
         } else if (cursors.down.isDown || cursors.s.isDown) {
@@ -124,26 +189,81 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
         
         this.setVelocity(velocityX, velocityY);
         
-        // Update particle trail
-        if (velocityX !== 0 || velocityY !== 0) {
+        // Update particle trail intensity based on speed
+        const isMoving = velocityX !== 0 || velocityY !== 0;
+        if (isMoving) {
             this.play('vehicle-fly', true);
             if (this.trail) {
                 this.trail.start();
+                // Adjust particle frequency based on speed
+                this.trail.setFrequency(Math.max(30, 80 * (this.speed / this.maxSpeed)));
+            }
+            if (this.sideTrail1) {
+                this.sideTrail1.start();
+            }
+            if (this.sideTrail2) {
+                this.sideTrail2.start();
             }
         } else {
             this.play('vehicle-idle', true);
             if (this.trail) {
                 this.trail.stop();
             }
+            if (this.sideTrail1) {
+                this.sideTrail1.stop();
+            }
+            if (this.sideTrail2) {
+                this.sideTrail2.stop();
+            }
+        }
+        
+        // Update visual speed indicator
+        this.updateSpeedIndicator();
+    }
+    
+    increaseSpeed() {
+        if (this.currentSpeedLevel < 5) {
+            this.currentSpeedLevel++;
+            this.speed = this.minSpeed + ((this.maxSpeed - this.minSpeed) / 4) * (this.currentSpeedLevel - 1);
+            this.boostSpeed = this.speed * 1.5;
+        }
+    }
+    
+    decreaseSpeed() {
+        if (this.currentSpeedLevel > 1) {
+            this.currentSpeedLevel--;
+            this.speed = this.minSpeed + ((this.maxSpeed - this.minSpeed) / 4) * (this.currentSpeedLevel - 1);
+            this.boostSpeed = this.speed * 1.5;
+        }
+    }
+    
+    updateSpeedIndicator() {
+        // Visual feedback for speed - change tint based on speed
+        const speedRatio = (this.speed - this.minSpeed) / (this.maxSpeed - this.minSpeed);
+        if (speedRatio < 0.33) {
+            this.setTint(0x00ff00); // Green - slow
+        } else if (speedRatio < 0.66) {
+            this.setTint(0x00ffff); // Cyan - medium
+        } else {
+            this.setTint(0xff00ff); // Magenta - fast
         }
     }
     
     activate() {
         this.isActive = true;
         this.playerInside = true;
-        this.setTint(0x00ffff);
         // Disable gravity when vehicle is active (can fly)
         this.body.setAllowGravity(false);
+        
+        // Update speed indicator visual
+        this.updateSpeedIndicator();
+        
+        // Show speed indicator UI
+        const speedEl = document.getElementById('speed-indicator');
+        if (speedEl) {
+            speedEl.style.display = 'block';
+            speedEl.textContent = `Speed: ${this.currentSpeedLevel}/5 (${Math.round(this.speed)} px/s)`;
+        }
     }
     
     deactivate() {
@@ -153,9 +273,21 @@ class Vehicle extends Phaser.Physics.Arcade.Sprite {
         if (this.trail) {
             this.trail.stop();
         }
+        if (this.sideTrail1) {
+            this.sideTrail1.stop();
+        }
+        if (this.sideTrail2) {
+            this.sideTrail2.stop();
+        }
         this.setVelocity(0, 0);
         // Re-enable gravity when vehicle is inactive
         this.body.setAllowGravity(true);
+        
+        // Hide speed indicator
+        const speedEl = document.getElementById('speed-indicator');
+        if (speedEl) {
+            speedEl.style.display = 'none';
+        }
     }
     
     travelToNextUniverse() {

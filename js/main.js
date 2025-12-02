@@ -44,6 +44,10 @@ class GameScene extends Phaser.Scene {
         this.eKey = this.input.keyboard.addKey('E');
         this.rKey = this.input.keyboard.addKey('R');
         this.shiftKey = this.input.keyboard.addKey('SHIFT');
+        this.qKey = this.input.keyboard.addKey('Q');
+        this.plusKey = this.input.keyboard.addKey('PLUS');
+        this.minusKey = this.input.keyboard.addKey('MINUS');
+        this.equalsKey = this.input.keyboard.addKey('EQUALS');
         
         // Combine keys
         this.controls = {
@@ -56,8 +60,15 @@ class GameScene extends Phaser.Scene {
             s: this.wasd.S,
             a: this.wasd.A,
             d: this.wasd.D,
-            shift: this.shiftKey
+            shift: this.shiftKey,
+            q: this.qKey,
+            plus: this.plusKey,
+            minus: this.minusKey,
+            equals: this.equalsKey
         };
+        
+        // Track speed control to prevent conflicts
+        this.speedControlCooldown = 0;
         
         // Vehicle interaction
         this.physics.add.overlap(this.player, this.vehicle, this.handleVehicleInteraction, null, this);
@@ -74,6 +85,19 @@ class GameScene extends Phaser.Scene {
     }
     
     update() {
+        // Speed control (only when in vehicle)
+        if (this.vehicle.isActive && this.vehicle.playerInside) {
+            // Q for slower, =/+ for faster
+            if (Phaser.Input.Keyboard.JustDown(this.qKey)) {
+                this.vehicle.decreaseSpeed();
+                this.updateUI();
+            }
+            if (Phaser.Input.Keyboard.JustDown(this.equalsKey) || Phaser.Input.Keyboard.JustDown(this.plusKey)) {
+                this.vehicle.increaseSpeed();
+                this.updateUI();
+            }
+        }
+        
         if (this.vehicle.isActive && this.vehicle.playerInside) {
             // Player is in vehicle
             this.vehicle.update(this.controls);
@@ -166,6 +190,14 @@ class GameScene extends Phaser.Scene {
         document.getElementById('universe-name').textContent = universe.name;
         document.getElementById('planet-name').textContent = planet.name;
         document.getElementById('distance').textContent = totalDistance;
+        
+        // Update speed indicator if vehicle is active
+        if (this.vehicle && this.vehicle.isActive) {
+            const speedEl = document.getElementById('speed-indicator');
+            if (speedEl) {
+                speedEl.textContent = `Speed: ${this.vehicle.currentSpeedLevel}/5 (${Math.round(this.vehicle.speed)} px/s)`;
+            }
+        }
     }
     
     createVisualEffects() {
