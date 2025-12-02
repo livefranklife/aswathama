@@ -16,7 +16,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, #0a0a2e 0%, #16213e 50%, #0f3460 100%);
+            background: #000;
             font-family: 'Arial', sans-serif;
             overflow: hidden;
         }
@@ -28,8 +28,183 @@
             border: 3px solid #00ffff;
             border-radius: 10px;
             box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+            overflow: hidden;
         }
         
+        /* Galaxy Background */
+        #galaxy-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, #1a0033 0%, #000000 70%);
+            overflow: hidden;
+        }
+        
+        /* Stars */
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+        
+        /* Nebula clouds */
+        .nebula {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.3;
+            filter: blur(60px);
+            animation: drift 20s infinite;
+        }
+        
+        .nebula-1 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, #4a0080, transparent);
+            top: 10%;
+            left: 20%;
+            animation-duration: 25s;
+        }
+        
+        .nebula-2 {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, #0066ff, transparent);
+            top: 60%;
+            right: 15%;
+            animation-duration: 30s;
+        }
+        
+        .nebula-3 {
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, #ff00ff, transparent);
+            bottom: 20%;
+            left: 50%;
+            animation-duration: 35s;
+        }
+        
+        @keyframes drift {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(30px, -20px); }
+            50% { transform: translate(-20px, 30px); }
+            75% { transform: translate(20px, 20px); }
+        }
+        
+        /* Rocket */
+        #rocket {
+            position: absolute;
+            width: 60px;
+            height: 80px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            animation: fly 15s infinite linear;
+        }
+        
+        .rocket-body {
+            width: 0;
+            height: 0;
+            border-left: 25px solid transparent;
+            border-right: 25px solid transparent;
+            border-bottom: 60px solid #ff6b00;
+            position: relative;
+            filter: drop-shadow(0 0 10px #ff6b00);
+        }
+        
+        .rocket-window {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: #00ffff;
+            border-radius: 50%;
+            box-shadow: 0 0 15px #00ffff;
+        }
+        
+        .rocket-wing-left {
+            position: absolute;
+            bottom: 10px;
+            left: -15px;
+            width: 0;
+            height: 0;
+            border-right: 15px solid #ff4500;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+        }
+        
+        .rocket-wing-right {
+            position: absolute;
+            bottom: 10px;
+            right: -15px;
+            width: 0;
+            height: 0;
+            border-left: 15px solid #ff4500;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+        }
+        
+        /* Engine fire */
+        .engine-fire {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 40px;
+            background: linear-gradient(to bottom, #ffff00, #ff6b00, #ff0000);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: flame 0.3s infinite;
+            filter: blur(3px);
+            box-shadow: 0 0 20px #ff6b00, 0 0 30px #ff4500;
+        }
+        
+        @keyframes flame {
+            0%, 100% { 
+                height: 40px;
+                width: 20px;
+            }
+            50% { 
+                height: 50px;
+                width: 25px;
+            }
+        }
+        
+        @keyframes fly {
+            0% {
+                left: -100px;
+                top: 50%;
+                transform: translateY(-50%) rotate(0deg);
+            }
+            25% {
+                top: 20%;
+                transform: translateY(-50%) rotate(-15deg);
+            }
+            50% {
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+            75% {
+                top: 80%;
+                transform: translateY(-50%) rotate(15deg);
+            }
+            100% {
+                left: 1300px;
+                top: 50%;
+                transform: translateY(-50%) rotate(0deg);
+            }
+        }
+        
+        /* UI Overlay */
         #ui-overlay {
             position: absolute;
             top: 10px;
@@ -70,32 +245,11 @@
             margin-bottom: 4px;
         }
         
-        #controls-panel .control-title {
-            color: #ffff00;
-            font-weight: bold;
-            font-size: 11px;
-            margin-bottom: 2px;
-        }
-        
         #controls-panel .control-item {
             margin-left: 5px;
             color: #00ffff;
             font-size: 9px;
             line-height: 1.3;
-        }
-        
-        #instructions {
-            display: none;
-        }
-        
-        .loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #00ffff;
-            font-size: 24px;
-            z-index: 2000;
         }
         
         canvas {
@@ -105,31 +259,87 @@
 </head>
 <body>
     <div id="game-container">
+        <div id="galaxy-background">
+            <!-- Nebula clouds -->
+            <div class="nebula nebula-1"></div>
+            <div class="nebula nebula-2"></div>
+            <div class="nebula nebula-3"></div>
+            
+            <!-- Stars will be generated by JS -->
+            
+            <!-- Rocket -->
+            <div id="rocket">
+                <div class="rocket-body">
+                    <div class="rocket-window"></div>
+                    <div class="rocket-wing-left"></div>
+                    <div class="rocket-wing-right"></div>
+                </div>
+                <div class="engine-fire"></div>
+            </div>
+        </div>
+        
         <div id="ui-overlay">
-            <div class="ui-stat">Universe: <span id="universe-name">Loading...</span></div>
-            <div class="ui-stat">Planet: <span id="planet-name">-</span></div>
+            <div class="ui-stat">Universe: <span id="universe-name">Milky Way Galaxy</span></div>
+            <div class="ui-stat">Planet: <span id="planet-name">Traveling...</span></div>
             <div class="ui-stat">Distance: <span id="distance">0</span> light years</div>
         </div>
         
         <div id="controls-panel">
             <div class="control-section">
-                <div class="control-item">Arrow Keys - Fly</div>
-                <div class="control-item">E - Enter/Exit</div>
-                <div class="control-item">R - Travel Universe</div>
+                <div class="control-item">Rocket Flying Through Universe</div>
             </div>
         </div>
-        
-        <div id="instructions" style="display: none;"></div>
-        <div class="loading" id="loading">Loading Universe...</div>
     </div>
     
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
-    <script src="js/config.js"></script>
-    <script src="js/player.js"></script>
-    <script src="js/vehicle.js"></script>
-    <script src="js/worlds.js"></script>
-    <script src="js/main.js"></script>
+    <script>
+        // Create stars
+        const galaxyBg = document.getElementById('galaxy-background');
+        for (let i = 0; i < 200; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.width = Math.random() * 3 + 1 + 'px';
+            star.style.height = star.style.width;
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            galaxyBg.appendChild(star);
+        }
+        
+        // Universe progression
+        const universes = [
+            "Milky Way Galaxy",
+            "Comet Field",
+            "Solar Planets System",
+            "Black Hole Universe",
+            "Andromeda Galaxy",
+            "Nebula Cluster",
+            "Parallel Universe Alpha",
+            "Final Destination - Alpha Centauri"
+        ];
+        
+        let currentUniverse = 0;
+        let distance = 0;
+        let planetIndex = 0;
+        const planets = ["Earth", "Mars", "Jupiter", "Saturn", "Neptune", "Pluto", "Alpha Centauri"];
+        
+        // Update UI
+        function updateUI() {
+            document.getElementById('universe-name').textContent = universes[currentUniverse];
+            document.getElementById('planet-name').textContent = planets[planetIndex] || "Traveling...";
+            document.getElementById('distance').textContent = distance;
+        }
+        
+        // Cycle through universes
+        setInterval(() => {
+            planetIndex = (planetIndex + 1) % planets.length;
+            if (planetIndex === 0) {
+                currentUniverse = (currentUniverse + 1) % universes.length;
+            }
+            distance += Math.floor(Math.random() * 50) + 25;
+            updateUI();
+        }, 3000);
+        
+        updateUI();
+    </script>
 </body>
 </html>
-
-
