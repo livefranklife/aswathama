@@ -1,0 +1,25 @@
+{
+  "name": "aswathama-game",
+  "version": "1.0.0",
+  "description": "Ashwatthama Alpha - A universe exploration game built with Phaser",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server -p 8000 -c-1",
+    "dev": "npx http-server -p 8000 -c-1"
+  },
+  "keywords": [
+    "phaser",
+    "game",
+    "universe",
+    "exploration"
+  ],
+  "author": "livefranklife",
+  "license": "MIT",
+  "dependencies": {
+    "phaser": "^3.80.1"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
+

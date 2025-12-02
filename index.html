@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ashwatthama Alpha - Universe Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a0a2e 0%, #16213e 50%, #0f3460 100%);
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+        
+        #game-container {
+            position: relative;
+            border: 3px solid #00ffff;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        }
+        
+        #ui-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #00ffff;
+            font-size: 18px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            pointer-events: none;
+        }
+        
+        #instructions {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ffff00;
+            font-size: 14px;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            pointer-events: none;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #00ffff;
+            font-size: 24px;
+            z-index: 2000;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="ui-overlay">
+            <div>Universe: <span id="universe-name">Loading...</span></div>
+            <div>Planet: <span id="planet-name">-</span></div>
+            <div>Distance Traveled: <span id="distance">0</span> light years</div>
+        </div>
+        <div id="instructions">
+            <div>Arrow Keys / WASD: Move | Space: Jump | E: Enter Vehicle | R: Travel to Next Universe</div>
+        </div>
+        <div class="loading" id="loading">Loading Universe...</div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/vehicle.js"></script>
+    <script src="js/worlds.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
+
