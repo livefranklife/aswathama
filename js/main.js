@@ -21,9 +21,6 @@ class GameScene extends Phaser.Scene {
             // Initialize world generator
             this.worldGenerator = new WorldGenerator(this);
             
-            // Initialize encounter system
-            this.encounterSystem = new EncounterSystem(this);
-            
             // Get current planet data
             const universe = UNIVERSES[currentUniverseIndex];
             const planet = universe.planets[currentPlanetIndex];
@@ -36,9 +33,6 @@ class GameScene extends Phaser.Scene {
             
             // Create vehicle
             this.vehicle = new Vehicle(this, CONFIG.width - 150, CONFIG.height - 200);
-            
-            // Create special action zones
-            this.createSpecialZones();
             
             // Create collisions and store references
             this.playerCollider = this.physics.add.collider(this.player, this.worldGenerator.getPlatforms());
